@@ -1,7 +1,6 @@
 package com.smilesmile1973.graphics;
 
-
-public class PixelArray implements IPixelArray{
+public class PixelArray implements IPixelArray {
 	private int[] table = null;
 	private int backgroundColor = 0;
 	private int width = 0;
@@ -14,9 +13,9 @@ public class PixelArray implements IPixelArray{
 		table = new int[width * height];
 		clear();
 	}
-	
-	public void clear(){
-		for (int i = 0;i < getTable().length;i++){
+
+	public void clear() {
+		for (int i = 0; i < getTable().length; i++) {
 			getTable()[i] = backgroundColor;
 		}
 	}
@@ -49,8 +48,8 @@ public class PixelArray implements IPixelArray{
 
 	public void fillRectangleOfPixel(int x, int y, int width, int height, int[] arrayOfPixels) {
 		int c = 0;
-		for (int ix = x; ix < x + width; ix++) {
-			for (int iy = y; iy < y + height; iy++) {
+		for (int iy = y; iy < y + height; iy++) {
+			for (int ix = x; ix < x + width; ix++) {
 				setPixel(ix, iy, arrayOfPixels[c++]);
 			}
 		}
@@ -163,10 +162,10 @@ public class PixelArray implements IPixelArray{
 	public void setHeight(int height) {
 		this.height = height;
 	}
-	
-	public void drawRect(int x, int y, int width,int height,int color){
-		for (int j = y; j < y + height; j++){
-			for (int i = x; i < x + width;i++){
+
+	public void drawRect(int x, int y, int width, int height, int color) {
+		for (int j = y; j < y + height; j++) {
+			for (int i = x; i < x + width; i++) {
 				setPixel(i, j, color);
 			}
 		}
@@ -175,8 +174,8 @@ public class PixelArray implements IPixelArray{
 	public int[] getRect(int x, int y, int width, int height) {
 		int[] results = new int[width * height];
 		int c = 0;
-		for (int ix = x; ix < (x + width); ix++) {
-			for (int iy = y; (iy < y + height); iy++) {
+		for (int iy = y; (iy < y + height); iy++) {
+			for (int ix = x; ix < (x + width); ix++) {
 				results[c++] = getPixel(ix, iy);
 			}
 		}
