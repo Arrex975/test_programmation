@@ -103,8 +103,8 @@ public class MainFrame extends JFrame implements ClockListener, KeyListener {
 		metalFonts = new MetalFonts();
 		setPixelArrayBackground(pixelArray);
 		setBufferedImage(bufferedImage);
-		Clock refreshScreenClock = new Clock(1000/50);
-		Clock prepareClock = new Clock(1000/100);
+		Clock refreshScreenClock = new Clock(1000 / 50);
+		Clock prepareClock = new Clock(1000 / 100);
 		refreshScreenClock.addClockListener(this);
 		prepareClock.addClockListener(new ClockListener() {
 			@Override
@@ -126,47 +126,53 @@ public class MainFrame extends JFrame implements ClockListener, KeyListener {
 			}
 		});
 		this.addKeyListener(this);
-		//Music
-		Module module = new Module( new java.io.FileInputStream("resources/xenophob.mod") );
-		Player player = new Player( module, false, true );
-		Thread thread = new Thread( player );
+		// Music
+		Module module = new Module(new java.io.FileInputStream("resources/xenophob.mod"));
+		Player player = new Player(module, false, true);
+		Thread thread = new Thread(player);
 		player.addPlayerListener(new PlayerListener() {
 			@Override
-			public synchronized void  processFrequency(int[] data,int length) {
-				int[][] rawPCM = SoundPcmUtils.transform(data,length);
+			public synchronized void processFrequency(int[] data, int length) {
+				int[][] rawPCM = SoundPcmUtils.transform(data, length);
 				Complex[] fftComplex = SoundPcmUtils.getFFTfromRawPCM(SoundPcmUtils.lead0(rawPCM[0]));
-				double[] amplitudes =  SoundPcmUtils.convertComplexToAmplitude(fftComplex, 48000);
-				//SoundPcmUtils.displayTable(fftComplex, fftComplex.length,48000);
-				leftSound = SoundPcmUtils.interpolate(60,rawPCM[0]);
-				rightSound = SoundPcmUtils.interpolate(60,rawPCM[1]);
+				double[] amplitudesD = SoundPcmUtils.convertComplexToAmplitude(fftComplex, 48000);
+				int[] indexes = SoundPcmUtils.getIndexForRangeOfFrequence(80,1080, 50, length, 48000);
+				amplitudes = SoundPcmUtils.getAmplitudes(amplitudesD, indexes);
+
+				// SoundPcmUtils.displayTable(fftComplex,
+				// fftComplex.length,48000);
+				leftSound = SoundPcmUtils.interpolate(60, rawPCM[0]);
+				rightSound = SoundPcmUtils.interpolate(60, rawPCM[1]);
 				leftSound = SoundPcmUtils.rescale(200, Short.MAX_VALUE, leftSound);
 				rightSound = SoundPcmUtils.rescale(200, Short.MAX_VALUE, rightSound);
-				
+
 			}
 		});
 		thread.start();
 	}
-	int[] leftSound ;
+
+	int[] leftSound;
 	int[] rightSound;
-	
-	public void drawLines(Graphics g,int origineX,int origineY, int width,int[] points){
-		if (points != null){
-			int space = (int) Math.round((double)width / (double)points.length);
-			for (int i = 0; i < points.length;i++){
+	int[] amplitudes;
+
+	public void drawLines(Graphics g, int origineX, int origineY, int width, int[] points) {
+		if (points != null) {
+			int space = (int) Math.round((double) width / (double) points.length);
+			for (int i = 0; i < points.length; i++) {
 				int x = origineX + space * i;
 				int y2 = origineY + points[i];
 				g.drawLine(x, origineY, x, y2);
 			}
 		}
 	}
-	
-	public synchronized void drawLines2(Graphics g,int origineX,int origineY, int width,int[] points){
-		g.drawLine(origineX,origineY,origineX+width,origineY);
-		if (points != null){
-			int space = (int) Math.round((double)width / (double)points.length);
+
+	public synchronized void drawLines2(Graphics g, int origineX, int origineY, int width, int[] points) {
+		g.drawLine(origineX, origineY, origineX + width, origineY);
+		if (points != null) {
+			int space = (int) Math.round((double) width / (double) points.length);
 			int x = origineX;
 			int y = origineY;
-			for (int i = 0; i < points.length;i++){
+			for (int i = 0; i < points.length; i++) {
 				int x2 = origineX + space * i;
 				int y2 = origineY + points[i];
 				g.drawLine(x, y, x2, y2);
@@ -179,57 +185,61 @@ public class MainFrame extends JFrame implements ClockListener, KeyListener {
 	private void setBufferStrategy(BufferStrategy bufferStrategy) {
 		this.bufferStrategy = bufferStrategy;
 	}
-	
+
 	int posX = 0;
 	int posY = 10;
-	boolean toLeft  = false;
+	boolean toLeft = false;
 	boolean toRight = true;
-	boolean toDown  = true;
-	boolean toUp   = false;
+	boolean toDown = true;
+	boolean toUp = false;
+
 	private void render(Graphics g) {
 		getDataBufferUtil().copyToDataBuffer(getPixelArrayBackground().getTable());
 		metalFonts.write(posX, posY, "WELCOME ALEXANDRE", getDataBufferUtil());
 		metalFonts.write(posX, posY + 45, "    (C)2015      ", getDataBufferUtil());
 		metalFonts.write(posX, posY + 80, ".................", getDataBufferUtil());
 		metalFonts.write(posX, posY + 115, "SCROLL SPEED " + String.valueOf(scrollSpeed), getDataBufferUtil());
-		if (toRight){
+		if (toRight) {
 			posX = posX + 4;
-			if (posX > (800-576)){
+			if (posX > (800 - 576)) {
 				toRight = false;
 				toLeft = true;
 			}
 		}
-		if (toLeft){
+		if (toLeft) {
 			posX = posX - 4;
-			if (posX < 10){
+			if (posX < 10) {
 				toRight = true;
 				toLeft = false;
 			}
 		}
-		if (toDown){
+		if (toDown) {
 			posY = posY + 4;
-			if (posY > (600-150)){
+			if (posY > (600 - 150)) {
 				toDown = false;
 				toUp = true;
 			}
 		}
-		if (toUp){
+		if (toUp) {
 			posY = posY - 4;
-			if (posY < 10){
+			if (posY < 10) {
 				toDown = true;
 				toUp = false;
 			}
 		}
 		g.drawImage(getBufferedImage(), 0, 0, null);
 		g.setColor(Color.WHITE);
-		drawLines2(g,10,300,300,leftSound);
-		drawLines2(g,490,300,300,rightSound);
+		drawLines2(g, 10, 300, 300, leftSound);
+		drawLines2(g, 490, 300, 300, rightSound);
+		if (amplitudes != null) {
+			for (int i = 0; i < amplitudes.length; i++) {
+				g.drawRect(10 + i * 6, 0, 6, amplitudes[i] * 4>200?200:amplitudes[i] * 4);
+			}
+		}
 		bufferStrategy.show();
 		g.dispose();
 
 	}
-	
-	
 
 	static public void main(String args[]) throws Exception {
 		new MainFrame();

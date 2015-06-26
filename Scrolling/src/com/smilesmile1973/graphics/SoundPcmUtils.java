@@ -70,6 +70,13 @@ public class SoundPcmUtils {
 		result = (index * sampleFrequency)/length;
 		return result;
 	}
+	
+	public static int getIndexByFrequency(double frequency,int length,int sampleFrequency){
+		double index = frequency * (double) length / (double) sampleFrequency;
+		return (int) index;
+	}
+	
+	
 
 	public static int nearestPowerOf2(final int a) {
 		int b = 1;
@@ -87,6 +94,23 @@ public class SoundPcmUtils {
 			System.out.println(String.format("%f", frequency)+";"+String.format("%f",amplitudes[i]));
 		}
 		System.out.println("===========================================");
+	}
+	
+	public static int[] getIndexForRangeOfFrequence(int startFrq,int endFrq,int numberOfBands,int length,int sampleFrequency){
+		int step = (endFrq-startFrq)/numberOfBands;
+		int[] results = new int[numberOfBands];
+		for (int i = 0; i < numberOfBands; i ++){
+			results[i] = getIndexByFrequency(startFrq + i * step, length, sampleFrequency);
+		}
+		return results;
+	}
+	
+	public static int[] getAmplitudes(double[] fftResults,int[] indexes){
+		int[] results = new int[indexes.length];
+		for (int i = 0; i < results.length;i++){
+			results[i] = (int) fftResults[indexes[i]];
+		}
+		return results;
 	}
 	
 	
