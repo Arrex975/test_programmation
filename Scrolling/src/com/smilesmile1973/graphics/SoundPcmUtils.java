@@ -1,38 +1,42 @@
 package com.smilesmile1973.graphics;
 
-import java.text.DecimalFormat;
-import java.util.Arrays;
-
 import com.smilesmile1973.Complex;
 import com.smilesmile1973.FFT;
 
 public class SoundPcmUtils {
+	
+	private static int[][] resultsTransform = new int[2][1];
 	public static int[][] transform(int[] data, int length) {
 		//int numberOfChannels = 2;
-		int[][] result = new int[2][length/2];
+		if (resultsTransform[0].length != length / 2){
+			resultsTransform = new int[2][length/2];
+		}
 		int c = 0;
 		for (int i = 0; i < length/2; i++) {
-			result[0][i]=data[c];
-			result[1][i]=data[c++];
+			resultsTransform[0][i]=data[c];
+			resultsTransform[1][i]=data[c++];
 			c++;
 		}
-		return result;
+		return resultsTransform;
 	}
 
+	private static int[] resultsInterpolate = new int[1];
 	public static int[] interpolate(int numberOfBand, int[] data) {
-		int[] result = new int[numberOfBand];
+		if (resultsInterpolate.length != numberOfBand){
+			resultsInterpolate = new int[numberOfBand];
+		}
 		int set = data.length / numberOfBand;
 		double tmp = 0;
 		int c = 0;
 		for (int i = 0; i < set * numberOfBand; i++) {
 			tmp = tmp + (double) data[i];
 			if ((i > 0) && (i % set == 0)) {
-				result[c] = (int) Math.round(tmp / (double) set);
+				resultsInterpolate[c] = (int) Math.round(tmp / (double) set);
 				c++;
 				tmp = 0;
 			}
 		}
-		return result;
+		return resultsInterpolate;
 	}
 
 	public static int[] rescale(int heightMax, int maxValue, int[] data) {

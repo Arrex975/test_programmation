@@ -26,8 +26,16 @@ public class DataBufferUtil implements IPixelArray {
 		this.height = height;
 	}
 
-	public void copyToDataBuffer(int[] array) {
+	public synchronized void copyToDataBuffer(int[] array) {
 		System.arraycopy(array, 0, table, 0, array.length);
+	}
+	
+	public synchronized void copyToDataBuffer(int[] array,int transparentColor) {
+		for (int i = 0; i < getTable().length;i++){
+			if (array[i] != transparentColor){
+				getTable()[i] = array[i];
+			}
+		}
 	}
 
 	public void setPixel(int x, int y, int color) {
@@ -39,8 +47,8 @@ public class DataBufferUtil implements IPixelArray {
 	@Override
 	public void fillRectangleOfPixel(int x, int y, int width, int height, int[] arrayOfPixels) {
 		int c = 0;
-		for (int ix = x; ix < x + width; ix++) {
-			for (int iy = y; iy < y + height; iy++) {
+		for (int iy = y; iy < y + height; iy++) {
+			for (int ix = x; ix < x + width; ix++) {
 				setPixel(ix, iy, arrayOfPixels[c++]);
 			}
 		}

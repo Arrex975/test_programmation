@@ -12,8 +12,12 @@ public class PixelArray implements IPixelArray{
 		setWidth(width);
 		setHeight(height);
 		table = new int[width * height];
-		for (int i = 0; i < table.length; i++) {
-			table[i] = backgroundColor;
+		clear();
+	}
+	
+	public void clear(){
+		for (int i = 0;i < getTable().length;i++){
+			getTable()[i] = backgroundColor;
 		}
 	}
 
@@ -158,6 +162,14 @@ public class PixelArray implements IPixelArray{
 
 	public void setHeight(int height) {
 		this.height = height;
+	}
+	
+	public void drawRect(int x, int y, int width,int height,int color){
+		for (int j = y; j < y + height; j++){
+			for (int i = x; i < x + width;i++){
+				setPixel(i, j, color);
+			}
+		}
 	}
 
 	public int[] getRect(int x, int y, int width, int height) {
