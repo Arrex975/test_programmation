@@ -105,14 +105,23 @@ public class SoundPcmUtils {
 		return results;
 	}
 	
-	public static int[] getAmplitudes(double[] fftResults,int[] indexes){
-		int[] results = new int[indexes.length];
-		for (int i = 0; i < results.length;i++){
-			results[i] = (int) fftResults[indexes[i]];
+	private static double[] resultsAmplitudes = new double[1];
+	public static double[] getAmplitudes(double[] fftResults,int[] indexes){
+		if (resultsAmplitudes.length != indexes.length){
+			resultsAmplitudes = new double[indexes.length];
 		}
-		return results;
+		for (int i = 0; i < resultsAmplitudes.length;i++){
+			double tmp = 0;
+			if (i+1 < indexes.length){
+				for (int j=indexes[i];j < indexes[i+1];j++){
+					tmp = tmp + fftResults[j];
+				}
+				tmp = tmp / (indexes[i+1]-indexes[i]);
+			}
+			resultsAmplitudes[i] = fftResults[indexes[i]];
+		}
+		return resultsAmplitudes;
 	}
-	
 	
 	public static int[] lead0(int[] data){
 		int[] results;

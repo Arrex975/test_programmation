@@ -136,7 +136,7 @@ public class MainFrame extends JFrame implements ClockListener, KeyListener {
 				int[][] rawPCM = SoundPcmUtils.transform(data, length);
 				Complex[] fftComplex = SoundPcmUtils.getFFTfromRawPCM(SoundPcmUtils.lead0(rawPCM[0]));
 				double[] amplitudesD = SoundPcmUtils.convertComplexToAmplitude(fftComplex, 48000);
-				int[] indexes = SoundPcmUtils.getIndexForRangeOfFrequence(80,1080, 50, length, 48000);
+				int[] indexes = SoundPcmUtils.getIndexForRangeOfFrequence(80,1080,20, length, 48000);
 				amplitudes = SoundPcmUtils.getAmplitudes(amplitudesD, indexes);
 
 				// SoundPcmUtils.displayTable(fftComplex,
@@ -153,7 +153,7 @@ public class MainFrame extends JFrame implements ClockListener, KeyListener {
 
 	int[] leftSound;
 	int[] rightSound;
-	int[] amplitudes;
+	double[] amplitudes;
 
 	public void drawLines(Graphics g, int origineX, int origineY, int width, int[] points) {
 		if (points != null) {
@@ -233,7 +233,7 @@ public class MainFrame extends JFrame implements ClockListener, KeyListener {
 		drawLines2(g, 490, 300, 300, rightSound);
 		if (amplitudes != null) {
 			for (int i = 0; i < amplitudes.length; i++) {
-				g.drawRect(10 + i * 6, 0, 6, amplitudes[i] * 4>200?200:amplitudes[i] * 4);
+				g.drawRect(10 + i * 15, 0, 15, (int) (amplitudes[i] * 4>200?200:amplitudes[i] * 4));
 			}
 		}
 		bufferStrategy.show();
