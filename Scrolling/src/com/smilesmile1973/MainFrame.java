@@ -32,6 +32,8 @@ public class MainFrame extends JFrame implements ClockListener, KeyListener {
 	private DataBufferUtil dataBufferUtil;
 	private MetalFonts metalFonts;
 	private PixelArray fttArray;
+	private int[] soundData;
+	private int lengthSound;
 
 	public DataBufferUtil getDataBufferUtil() {
 		return dataBufferUtil;
@@ -101,11 +103,11 @@ public class MainFrame extends JFrame implements ClockListener, KeyListener {
 		BufferedImage bufferedImage = BufferedImageUtils.loadBufferedImage("resources/london.jpg");
 		PixelArray pixelArray = BufferedImageUtils.convertToPixelArray(bufferedImage, true);
 		fttArray = new PixelArray(300, 200, 0);
-		setDataBufferUtil(new DataBufferUtil(bufferedImage.getRaster().getDataBuffer(), bufferedImage.getWidth(), bufferedImage.getHeight()));
+		setDataBufferUtil(new DataBufferUtil(bufferedImage.getRaster().getDataBuffer(), bufferedImage.getWidth(), bufferedImage.getHeight(), 0xFF00FF00));
 		metalFonts = new MetalFonts();
 		setPixelArrayBackground(pixelArray);
 		setBufferedImage(bufferedImage);
-		Clock refreshScreenClock = new Clock(1000 / 50);
+		Clock refreshScreenClock = new Clock(1000 / 25);
 		Clock prepareClock = new Clock(1000 / 100);
 		refreshScreenClock.addClockListener(this);
 		prepareClock.addClockListener(new ClockListener() {
@@ -125,6 +127,22 @@ public class MainFrame extends JFrame implements ClockListener, KeyListener {
 					getPixelArrayBackground().scrollDown(getScrollSpeed());
 					break;
 				}
+				if (soundData != null) {
+					int[][] rawPCM = SoundPcmUtils.transform(soundData, lengthSound);
+					Complex[] fftComplex = SoundPcmUtils.getFFTfromRawPCM(SoundPcmUtils.lead0(rawPCM[0]));
+					double[] amplitudesD = SoundPcmUtils.convertComplexToAmplitude(fftComplex, 48000);
+					int[] indexes = SoundPcmUtils.getIndexForRangeOfFrequence(80, 1080, 20, lengthSound, 48000);
+					amplitudes = SoundPcmUtils.getAmplitudes(amplitudesD, indexes);
+					leftSound = SoundPcmUtils.interpolate(60, rawPCM[0]);
+					rightSound = SoundPcmUtils.interpolate(60, rawPCM[1]);
+					leftSound = SoundPcmUtils.rescale(200, Short.MAX_VALUE, leftSound);
+					rightSound = SoundPcmUtils.rescale(200, Short.MAX_VALUE, rightSound);
+					if (amplitudes != null) {
+						for (int i = 0; i < amplitudes.length; i++) {
+							fttArray.drawRect(10 + i * 15, 0, 15, (int) (amplitudes[i] * 4 > 200 ? 200 : amplitudes[i] * 4), 0xffff0000);
+						}
+					}
+				}
 			}
 		});
 		this.addKeyListener(this);
@@ -135,25 +153,8 @@ public class MainFrame extends JFrame implements ClockListener, KeyListener {
 		player.addPlayerListener(new PlayerListener() {
 			@Override
 			public synchronized void processFrequency(int[] data, int length) {
-				int[][] rawPCM = SoundPcmUtils.transform(data, length);
-				Complex[] fftComplex = SoundPcmUtils.getFFTfromRawPCM(SoundPcmUtils.lead0(rawPCM[0]));
-				double[] amplitudesD = SoundPcmUtils.convertComplexToAmplitude(fftComplex, 48000);
-				int[] indexes = SoundPcmUtils.getIndexForRangeOfFrequence(80,1080,20, length, 48000);
-				amplitudes = SoundPcmUtils.getAmplitudes(amplitudesD, indexes);
-
-				// SoundPcmUtils.displayTable(fftComplex,
-				// fftComplex.length,48000);
-				leftSound = SoundPcmUtils.interpolate(60, rawPCM[0]);
-				rightSound = SoundPcmUtils.interpolate(60, rawPCM[1]);
-				leftSound = SoundPcmUtils.rescale(200, Short.MAX_VALUE, leftSound);
-				rightSound = SoundPcmUtils.rescale(200, Short.MAX_VALUE, rightSound);
-				fttArray.clear();
-				if (amplitudes != null) {
-					for (int i = 0; i < amplitudes.length; i++) {
-						fttArray.drawRect(10 + i * 15, 0, 15, (int) (amplitudes[i] * 4>200?200:amplitudes[i] * 4),0xffff0000);
-					}
-				}
-
+				soundData = data;
+				lengthSound = length;
 			}
 		});
 		thread.start();
@@ -208,7 +209,6 @@ public class MainFrame extends JFrame implements ClockListener, KeyListener {
 		metalFonts.write(posX, posY + 45, "    (C)2015      ", getDataBufferUtil());
 		metalFonts.write(posX, posY + 80, ".................", getDataBufferUtil());
 		metalFonts.write(posX, posY + 115, "SCROLL SPEED " + String.valueOf(scrollSpeed), getDataBufferUtil());
-		
 		if (toRight) {
 			posX = posX + 4;
 			if (posX > (800 - 576)) {
@@ -243,7 +243,6 @@ public class MainFrame extends JFrame implements ClockListener, KeyListener {
 		drawLines2(g, 490, 300, 300, rightSound);
 		bufferStrategy.show();
 		g.dispose();
-
 	}
 
 	static public void main(String args[]) throws Exception {
@@ -253,6 +252,9 @@ public class MainFrame extends JFrame implements ClockListener, KeyListener {
 	@Override
 	public void runMe() {
 		render(bufferStrategy.getDrawGraphics());
+		getDataBufferUtil().clear();
+		fttArray.clear();
+
 	}
 
 	int direction = 0;

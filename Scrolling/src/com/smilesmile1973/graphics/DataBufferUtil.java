@@ -19,11 +19,13 @@ public class DataBufferUtil implements IPixelArray {
 
 	private int height;
 
-	public DataBufferUtil(DataBuffer dataBuffer,int width,int height) {
+	public DataBufferUtil(DataBuffer dataBuffer,int width,int height,int color) {
 		this.dataBuffer = dataBuffer;
 		table = ((DataBufferInt) dataBuffer).getData();
 		this.width = width;
 		this.height = height;
+		this.setBackgroundColor(color);
+		this.clear();
 	}
 
 	public synchronized void copyToDataBuffer(int[] array) {
@@ -49,7 +51,8 @@ public class DataBufferUtil implements IPixelArray {
 		int c = 0;
 		for (int iy = y; iy < y + height; iy++) {
 			for (int ix = x; ix < x + width; ix++) {
-				setPixel(ix, iy, arrayOfPixels[c++]);
+				setPixel(ix, iy, arrayOfPixels[c]);
+				c++;
 			}
 		}
 	}
@@ -123,6 +126,12 @@ public class DataBufferUtil implements IPixelArray {
 			if (rgb == color) {
 				getTable()[i] = color;
 			}
+		}
+	}
+	
+	public void clear(){
+		for (int i = 0; i < getTable().length;i++){
+			getTable()[i] = getBackgroundColor();
 		}
 	}
 }

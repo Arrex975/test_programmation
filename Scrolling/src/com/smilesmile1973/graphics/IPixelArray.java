@@ -15,5 +15,6 @@ public interface IPixelArray {
 	public void setTable(int[] table);
 	public void setTransparentForColor(int color);
 	public void setWidth(int width);
+	public void clear();
 	
 }
