@@ -8,6 +8,38 @@ public class MetalFonts {
 	private int height = 32;
 	private int interLine = 3;
 	private TreeMap<String, int[]> fontsMap = new TreeMap<String, int[]>();
+	private int posX;
+	public int getPosX() {
+		return posX;
+	}
+
+	public void setPosX(int posX) {
+		this.posX = posX;
+	}
+
+	public int getPosY() {
+		return posY;
+	}
+
+	public void setPosY(int posY) {
+		this.posY = posY;
+	}
+
+	private int posY;
+	private String textToDisplay;
+
+	public String getTextToDisplay() {
+		return textToDisplay;
+	}
+
+	public void setTextToDisplay(String textToDisplay) {
+		this.textToDisplay = textToDisplay;
+	}
+	
+	public void setPosXPosy(int posX, int posY){
+		this.posX =posX;
+		this.posY = posY;
+	}
 
 	public MetalFonts() {
 		try {
@@ -72,11 +104,32 @@ public class MetalFonts {
 		}
 	}
 	
-	public void write(int x,int y,String string,IPixelArray out){
+	public void moveUp(int speed){
+		setPosXPosy(posX,posY-speed);
+	}
+	
+	public void moveDown(int speed){
+		setPosXPosy(posX,posY+speed);
+	}
+	
+	public int getHeightOfText(){
+		int result = 0;
+		for (int i = 0; i < getTextToDisplay().length();i++){
+			char tmpChar = getTextToDisplay().charAt(i);
+			if(tmpChar == '\n'){
+				result = result + height + interLine;
+			}
+		}
+		return result;
+	}
+	
+	public void write(IPixelArray out){
+		int x=posX;
+		int y=posY;
 		int tmpX = x;
 		int[] tmp = null;
-		for (int i = 0; i < string.length();i++){
-			char tmpChar = string.charAt(i);
+		for (int i = 0; i < getTextToDisplay().length();i++){
+			char tmpChar = getTextToDisplay().charAt(i);
 			if(tmpChar == '\n'){
 				y = y + height + interLine;
 				x = tmpX;

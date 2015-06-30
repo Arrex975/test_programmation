@@ -9,6 +9,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 import javax.swing.JFrame;
 
@@ -62,6 +64,7 @@ public class MainFrame extends JFrame implements ClockListener, KeyListener {
 	}
 
 	private PixelArray pixelArrayBackground;
+	private int heightText;
 
 	public PixelArray getPixelArrayBackground() {
 		return pixelArrayBackground;
@@ -105,6 +108,17 @@ public class MainFrame extends JFrame implements ClockListener, KeyListener {
 		fttArray = new PixelArray(300, 200, 0);
 		setDataBufferUtil(new DataBufferUtil(bufferedImage.getRaster().getDataBuffer(), bufferedImage.getWidth(), bufferedImage.getHeight(), 0xFF00FF00));
 		metalFonts = new MetalFonts();
+		//load the text
+		String content;
+		    try {
+		    	content = new String(Files.readAllBytes(Paths.get("resources/cv.txt")));
+		    } finally {
+		 
+		    }
+		//
+		    metalFonts.setTextToDisplay(content);
+		heightText = metalFonts.getHeightOfText();
+		
 		setPixelArrayBackground(pixelArray);
 		setBufferedImage(bufferedImage);
 		Clock refreshScreenClock = new Clock(1000 / 25);
@@ -125,6 +139,10 @@ public class MainFrame extends JFrame implements ClockListener, KeyListener {
 					break;
 				case 2:
 					getPixelArrayBackground().scrollDown(getScrollSpeed());
+					metalFonts.moveUp(2);
+					if (metalFonts.getPosY() <= -heightText){
+						metalFonts.setPosY(pixelArrayBackground.getWidth());
+					}
 					break;
 				}
 				if (soundData != null) {
@@ -147,7 +165,7 @@ public class MainFrame extends JFrame implements ClockListener, KeyListener {
 		});
 		this.addKeyListener(this);
 		// Music
-		Module module = new Module(new java.io.FileInputStream("resources/xenophob.mod"));
+		Module module = new Module(new java.io.FileInputStream("resources/12th_echo.mod"));
 		Player player = new Player(module, false, true);
 		Thread thread = new Thread(player);
 		player.addPlayerListener(new PlayerListener() {
@@ -196,7 +214,7 @@ public class MainFrame extends JFrame implements ClockListener, KeyListener {
 	}
 
 	int posX = 0;
-	int posY = 10;
+	int posY = 0;
 	boolean toLeft = false;
 	boolean toRight = true;
 	boolean toDown = true;
@@ -205,38 +223,7 @@ public class MainFrame extends JFrame implements ClockListener, KeyListener {
 	private void render(Graphics g) {
 		getDataBufferUtil().copyToDataBuffer(getPixelArrayBackground().getTable());
 		getDataBufferUtil().fillRectangleOfPixel(10, 0, 300, 200, fttArray.getTable());
-		metalFonts.write(posX, posY, "WELCOME ALEXANDRE", getDataBufferUtil());
-		metalFonts.write(posX, posY + 45, "    (C)2015      ", getDataBufferUtil());
-		metalFonts.write(posX, posY + 80, ".................", getDataBufferUtil());
-		metalFonts.write(posX, posY + 115, "SCROLL SPEED " + String.valueOf(scrollSpeed), getDataBufferUtil());
-		if (toRight) {
-			posX = posX + 4;
-			if (posX > (800 - 576)) {
-				toRight = false;
-				toLeft = true;
-			}
-		}
-		if (toLeft) {
-			posX = posX - 4;
-			if (posX < 10) {
-				toRight = true;
-				toLeft = false;
-			}
-		}
-		if (toDown) {
-			posY = posY + 4;
-			if (posY > (600 - 150)) {
-				toDown = false;
-				toUp = true;
-			}
-		}
-		if (toUp) {
-			posY = posY - 4;
-			if (posY < 10) {
-				toDown = true;
-				toUp = false;
-			}
-		}
+		metalFonts.write(getDataBufferUtil());
 		g.drawImage(getBufferedImage(), 0, 0, null);
 		g.setColor(Color.WHITE);
 		drawLines2(g, 10, 300, 300, leftSound);
