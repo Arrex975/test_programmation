@@ -57,7 +57,7 @@ public class MainFrame extends JFrame implements ClockListener, KeyListener {
 		super();
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		device = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
-		if (!device.isFullScreenSupported()) {
+		if (device.isFullScreenSupported()) {
 			setResizable(false);
 			setIgnoreRepaint(true);
 			setUndecorated(true);
