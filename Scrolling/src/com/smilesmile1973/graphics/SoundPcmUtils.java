@@ -49,16 +49,16 @@ public class SoundPcmUtils {
 		return result;
 	}
 
+	
 	public static Complex[] getFFTfromRawPCM(int[] data) {
-		Complex[] results = null;
+		Complex[] complexResults = null;
 		Complex[] complexData = new Complex[data.length];
 		//convert between 0 and 1
 		for (int i = 0; i < data.length; i++) {
-			
 			complexData[i] = new Complex((double)data[i]/(double)Short.MAX_VALUE, 0);
 		}
-		results = FFT.fft(complexData);
-		return results;
+		complexResults = FFT.fft(complexData);
+		return complexResults;
 	}
 	
 	public static double[] convertComplexToAmplitude(Complex[] complex,int sampleRate){
@@ -81,7 +81,6 @@ public class SoundPcmUtils {
 	}
 	
 	
-
 	public static int nearestPowerOf2(final int a) {
 		int b = 1;
 		while (b < a) {

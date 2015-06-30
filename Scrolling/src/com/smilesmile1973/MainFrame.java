@@ -16,6 +16,7 @@ import javax.swing.JFrame;
 
 import com.smilesmile1973.graphics.BufferedImageUtils;
 import com.smilesmile1973.graphics.DataBufferUtil;
+import com.smilesmile1973.graphics.FFTarray;
 import com.smilesmile1973.graphics.MetalFonts;
 import com.smilesmile1973.graphics.PixelArray;
 import com.smilesmile1973.graphics.SoundPcmUtils;
@@ -28,57 +29,35 @@ public class MainFrame extends JFrame implements ClockListener, KeyListener {
 	 * 
 	 */
 	private static final long serialVersionUID = -7542561518577030491L;
-	private GraphicsDevice device;
-	private BufferStrategy bufferStrategy;
+
+	static public void main(String args[]) throws Exception {
+		new MainFrame();
+	}
+
+	double[] amplitudes;
 	private BufferedImage bufferedImage;
+	private BufferStrategy bufferStrategy;
 	private DataBufferUtil dataBufferUtil;
+	private GraphicsDevice device;
+	private int direction = 0;
+	private int heightText;
+	private int keyPressed;
 	private MetalFonts metalFonts;
-	private PixelArray fttArray;
+	private PixelArray pixelArrayBackground;
+	private int[] leftSound;
+	private int[] rightSound;
 	private int[] soundData;
 	private int lengthSound;
-
-	public DataBufferUtil getDataBufferUtil() {
-		return dataBufferUtil;
-	}
-
-	public void setDataBufferUtil(DataBufferUtil dataBufferUtil) {
-		this.dataBufferUtil = dataBufferUtil;
-	}
-
-	private int keyPressed;
-
-	public int getKeyPressed() {
-		return keyPressed;
-	}
-
-	public void setKeyPressed(int keyPressed) {
-		this.keyPressed = keyPressed;
-	}
-
-	public BufferedImage getBufferedImage() {
-		return bufferedImage;
-	}
-
-	public void setBufferedImage(BufferedImage bufferedImage) {
-		this.bufferedImage = bufferedImage;
-	}
-
-	private PixelArray pixelArrayBackground;
-	private int heightText;
-
-	public PixelArray getPixelArrayBackground() {
-		return pixelArrayBackground;
-	}
-
-	public void setPixelArrayBackground(PixelArray pixelArray) {
-		this.pixelArrayBackground = pixelArray;
-	}
-
+	private int scrollSpeed = 1;
+	private FFTarray fftArrayLeft;
+	private FFTarray fftArrayRight;
+	
+	
 	public MainFrame() throws Exception {
 		super();
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		device = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
-		if (device.isFullScreenSupported()) {
+		if (!device.isFullScreenSupported()) {
 			setResizable(false);
 			setIgnoreRepaint(true);
 			setUndecorated(true);
@@ -104,22 +83,23 @@ public class MainFrame extends JFrame implements ClockListener, KeyListener {
 		this.setBufferStrategy(bufferStrategy);
 		validate();
 		BufferedImage bufferedImage = BufferedImageUtils.loadBufferedImage("resources/london.jpg");
-		PixelArray pixelArray = BufferedImageUtils.convertToPixelArray(bufferedImage, true);
-		fttArray = new PixelArray(300, 200, 0);
+		String content = new String(Files.readAllBytes(Paths.get("resources/cv.txt")));
+		Module module = new Module(new java.io.FileInputStream("resources/12th_echo.mod"));
+
+		pixelArrayBackground = BufferedImageUtils.convertToPixelArray(bufferedImage, true);
 		setDataBufferUtil(new DataBufferUtil(bufferedImage.getRaster().getDataBuffer(), bufferedImage.getWidth(), bufferedImage.getHeight(), 0xFF00FF00));
 		metalFonts = new MetalFonts();
-		//load the text
-		String content;
-		    try {
-		    	content = new String(Files.readAllBytes(Paths.get("resources/cv.txt")));
-		    } finally {
-		 
-		    }
-		//
-		    metalFonts.setTextToDisplay(content);
+		metalFonts.setTextToDisplay(content);
 		heightText = metalFonts.getHeightOfText();
 		
-		setPixelArrayBackground(pixelArray);
+		fftArrayLeft = new FFTarray();
+		fftArrayRight = new FFTarray();
+		fftArrayLeft.setPosX(10);
+		fftArrayLeft.setPosY(400);
+		fftArrayRight.setPosX(490);
+		fftArrayRight.setPosY(400);
+		
+		
 		setBufferedImage(bufferedImage);
 		Clock refreshScreenClock = new Clock(1000 / 25);
 		Clock prepareClock = new Clock(1000 / 100);
@@ -129,45 +109,38 @@ public class MainFrame extends JFrame implements ClockListener, KeyListener {
 			public void runMe() {
 				switch (direction) {
 				case 4:
-					getPixelArrayBackground().scrollLeft(getScrollSpeed());
+					pixelArrayBackground.scrollLeft(getScrollSpeed());
 					break;
 				case 6:
-					getPixelArrayBackground().scrollRight(getScrollSpeed());
+					pixelArrayBackground.scrollRight(getScrollSpeed());
 					break;
 				case 8:
-					getPixelArrayBackground().scrollUp(getScrollSpeed());
+					pixelArrayBackground.scrollUp(getScrollSpeed());
 					break;
 				case 2:
-					getPixelArrayBackground().scrollDown(getScrollSpeed());
+					pixelArrayBackground.scrollDown(getScrollSpeed());
 					metalFonts.moveUp(2);
-					if (metalFonts.getPosY() <= -heightText){
+					if (metalFonts.getPosY() <= -heightText) {
 						metalFonts.setPosY(pixelArrayBackground.getWidth());
 					}
 					break;
 				}
 				if (soundData != null) {
 					int[][] rawPCM = SoundPcmUtils.transform(soundData, lengthSound);
-					Complex[] fftComplex = SoundPcmUtils.getFFTfromRawPCM(SoundPcmUtils.lead0(rawPCM[0]));
-					double[] amplitudesD = SoundPcmUtils.convertComplexToAmplitude(fftComplex, 48000);
-					int[] indexes = SoundPcmUtils.getIndexForRangeOfFrequence(80, 1080, 20, lengthSound, 48000);
-					amplitudes = SoundPcmUtils.getAmplitudes(amplitudesD, indexes);
 					leftSound = SoundPcmUtils.interpolate(60, rawPCM[0]);
 					rightSound = SoundPcmUtils.interpolate(60, rawPCM[1]);
 					leftSound = SoundPcmUtils.rescale(200, Short.MAX_VALUE, leftSound);
 					rightSound = SoundPcmUtils.rescale(200, Short.MAX_VALUE, rightSound);
-					if (amplitudes != null) {
-						for (int i = 0; i < amplitudes.length; i++) {
-							fttArray.drawRect(10 + i * 15, 0, 15, (int) (amplitudes[i] * 4 > 200 ? 200 : amplitudes[i] * 4), 0xffff0000);
-						}
-					}
+					fftArrayLeft.processSoundData(rawPCM[0], lengthSound);
+					fftArrayRight.processSoundData(rawPCM[1], lengthSound);
 				}
 			}
 		});
 		this.addKeyListener(this);
 		// Music
-		Module module = new Module(new java.io.FileInputStream("resources/12th_echo.mod"));
+
 		Player player = new Player(module, false, true);
-		Thread thread = new Thread(player);
+		Thread threadPlayer = new Thread(player);
 		player.addPlayerListener(new PlayerListener() {
 			@Override
 			public synchronized void processFrequency(int[] data, int length) {
@@ -175,21 +148,13 @@ public class MainFrame extends JFrame implements ClockListener, KeyListener {
 				lengthSound = length;
 			}
 		});
-		thread.start();
+		threadPlayer.start();
 	}
 
-	int[] leftSound;
-	int[] rightSound;
-	double[] amplitudes;
-
-	public void drawLines(Graphics g, int origineX, int origineY, int width, int[] points) {
-		if (points != null) {
-			int space = (int) Math.round((double) width / (double) points.length);
-			for (int i = 0; i < points.length; i++) {
-				int x = origineX + space * i;
-				int y2 = origineY + points[i];
-				g.drawLine(x, origineY, x, y2);
-			}
+	public void decScrollSpeed() {
+		int minSpeed = 0;
+		if (scrollSpeed > minSpeed) {
+			scrollSpeed--;
 		}
 	}
 
@@ -209,43 +174,28 @@ public class MainFrame extends JFrame implements ClockListener, KeyListener {
 		}
 	}
 
-	private void setBufferStrategy(BufferStrategy bufferStrategy) {
-		this.bufferStrategy = bufferStrategy;
+	public BufferedImage getBufferedImage() {
+		return bufferedImage;
 	}
 
-	int posX = 0;
-	int posY = 0;
-	boolean toLeft = false;
-	boolean toRight = true;
-	boolean toDown = true;
-	boolean toUp = false;
-
-	private void render(Graphics g) {
-		getDataBufferUtil().copyToDataBuffer(getPixelArrayBackground().getTable());
-		getDataBufferUtil().fillRectangleOfPixel(10, 0, 300, 200, fttArray.getTable());
-		metalFonts.write(getDataBufferUtil());
-		g.drawImage(getBufferedImage(), 0, 0, null);
-		g.setColor(Color.WHITE);
-		drawLines2(g, 10, 300, 300, leftSound);
-		drawLines2(g, 490, 300, 300, rightSound);
-		bufferStrategy.show();
-		g.dispose();
+	public DataBufferUtil getDataBufferUtil() {
+		return dataBufferUtil;
 	}
 
-	static public void main(String args[]) throws Exception {
-		new MainFrame();
+	public int getKeyPressed() {
+		return keyPressed;
 	}
 
-	@Override
-	public void runMe() {
-		render(bufferStrategy.getDrawGraphics());
-		getDataBufferUtil().clear();
-		fttArray.clear();
-
+	public int getScrollSpeed() {
+		return scrollSpeed;
 	}
 
-	int direction = 0;
-	int scrollSpeed = 1;
+	public void incScrollSpeed() {
+		int maxSpeed = 200;
+		if (scrollSpeed < maxSpeed) {
+			scrollSpeed++;
+		}
+	}
 
 	@Override
 	public void keyPressed(KeyEvent e) {
@@ -274,28 +224,6 @@ public class MainFrame extends JFrame implements ClockListener, KeyListener {
 		}
 	}
 
-	public void incScrollSpeed() {
-		int maxSpeed = 200;
-		if (scrollSpeed < maxSpeed) {
-			scrollSpeed++;
-		}
-	}
-
-	public int getScrollSpeed() {
-		return scrollSpeed;
-	}
-
-	public void setScrollSpeed(int scrollSpeed) {
-		this.scrollSpeed = scrollSpeed;
-	}
-
-	public void decScrollSpeed() {
-		int minSpeed = 0;
-		if (scrollSpeed > minSpeed) {
-			scrollSpeed--;
-		}
-	}
-
 	@Override
 	public void keyReleased(KeyEvent e) {
 		// TODO Auto-generated method stub
@@ -306,5 +234,46 @@ public class MainFrame extends JFrame implements ClockListener, KeyListener {
 	public void keyTyped(KeyEvent e) {
 		// TODO Auto-generated method stub
 
+	}
+
+	private void render(Graphics g) {
+		getDataBufferUtil().copyToDataBuffer(pixelArrayBackground.getTable());
+		fftArrayLeft.write(getDataBufferUtil());
+		fftArrayRight.write(getDataBufferUtil());
+		metalFonts.write(getDataBufferUtil());
+		g.drawImage(getBufferedImage(), 0, 0, null);
+		g.setColor(Color.WHITE);
+		drawLines2(g, 10, 300, 300, leftSound);
+		drawLines2(g, 490, 300, 300, rightSound);
+		bufferStrategy.show();
+		g.dispose();
+	}
+
+	@Override
+	public void runMe() {
+		render(bufferStrategy.getDrawGraphics());
+		getDataBufferUtil().clear();
+		fftArrayLeft.clear();
+		fftArrayRight.clear();
+	}
+
+	public void setBufferedImage(BufferedImage bufferedImage) {
+		this.bufferedImage = bufferedImage;
+	}
+
+	private void setBufferStrategy(BufferStrategy bufferStrategy) {
+		this.bufferStrategy = bufferStrategy;
+	}
+
+	public void setDataBufferUtil(DataBufferUtil dataBufferUtil) {
+		this.dataBufferUtil = dataBufferUtil;
+	}
+
+	public void setKeyPressed(int keyPressed) {
+		this.keyPressed = keyPressed;
+	}
+
+	public void setScrollSpeed(int scrollSpeed) {
+		this.scrollSpeed = scrollSpeed;
 	}
 }
