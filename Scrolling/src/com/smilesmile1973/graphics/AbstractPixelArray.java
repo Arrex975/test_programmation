@@ -5,14 +5,14 @@ public abstract class AbstractPixelArray implements IPixelArray {
 	private int backgroundColor = 0;
 	private int width = 0;
 	private int height = 0;
-	
+
 	@Override
 	public void clear() {
 		for (int i = 0; i < getTable().length; i++) {
 			getTable()[i] = backgroundColor;
 		}
 	}
-	
+
 	public void fillRectangleOfPixel(int x, int y, int width, int height, int[] arrayOfPixels) {
 		int c = 0;
 		for (int iy = y; iy < y + height; iy++) {
@@ -77,8 +77,11 @@ public abstract class AbstractPixelArray implements IPixelArray {
 	 * This method will write a pixel at x and y.<br>
 	 * If x >= 0 and x < {@link #getWidth()}<br>
 	 * If y >= 0 and y < {@link #getHeight()}<br>
-	 * @param x position on the x axis.
-	 * @param y position on the y axis.
+	 * 
+	 * @param x
+	 *            position on the x axis.
+	 * @param y
+	 *            position on the y axis.
 	 * @author marechal
 	 */
 	public void setPixel(int x, int y, int color) {
@@ -112,4 +115,42 @@ public abstract class AbstractPixelArray implements IPixelArray {
 		this.height = height;
 	}
 
+	public synchronized void drawLine(int x1, int y1, int x2, int y2, int color) {
+		int d = 0;
+
+		int dy = Math.abs(y2 - y1);
+		int dx = Math.abs(x2 - x1);
+
+		int dy2 = (dy << 1); // slope scaling factors to avoid floating
+		int dx2 = (dx << 1); // point
+
+		int ix = x1 < x2 ? 1 : -1; // increment direction
+		int iy = y1 < y2 ? 1 : -1;
+
+		if (dy <= dx) {
+			for (;;) {
+				setPixel(x1, y1, color);
+				if (x1 == x2)
+					break;
+				x1 += ix;
+				d += dy2;
+				if (d > dx) {
+					y1 += iy;
+					d -= dx2;
+				}
+			}
+		} else {
+			for (;;) {
+				setPixel(x1, y1, color);
+				if (y1 == y2)
+					break;
+				y1 += iy;
+				d += dx2;
+				if (d > dy) {
+					x1 += ix;
+					d -= dy2;
+				}
+			}
+		}
+	}
 }

@@ -17,5 +17,6 @@ public interface IPixelArray {
 	public void setWidth(int width);
 	public void clear();
 	void setHeight(int height);
+	public void drawLine(int x1, int y1, int x2, int y2, int color);
 	
 }

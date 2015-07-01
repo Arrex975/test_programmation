@@ -159,7 +159,7 @@ public class MainFrame extends JFrame implements ClockListener, KeyListener {
 	}
 
 	public synchronized void drawLines2(Graphics g, int origineX, int origineY, int width, int[] points) {
-		g.drawLine(origineX, origineY, origineX + width, origineY);
+		getDataBufferUtil().drawLine(origineX, origineY, origineX + width, origineY,0xffffffff);
 		if (points != null) {
 			int space = (int) Math.round((double) width / (double) points.length);
 			int x = origineX;
@@ -236,7 +236,7 @@ public class MainFrame extends JFrame implements ClockListener, KeyListener {
 
 	}
 
-	private void render(Graphics g) {
+	private synchronized void render(Graphics g) {
 		getDataBufferUtil().copyToDataBuffer(pixelArrayBackground.getTable());
 		fftArrayLeft.write(getDataBufferUtil());
 		fftArrayRight.write(getDataBufferUtil());
