@@ -18,6 +18,7 @@ import com.smilesmile1973.graphics.BufferedImageUtils;
 import com.smilesmile1973.graphics.DataBufferUtil;
 import com.smilesmile1973.graphics.FFTarray;
 import com.smilesmile1973.graphics.MetalFonts;
+import com.smilesmile1973.graphics.OscilloscopeArray;
 import com.smilesmile1973.graphics.PixelArray;
 import com.smilesmile1973.graphics.SoundPcmUtils;
 import com.smilesmile1973.micromod.Module;
@@ -51,6 +52,9 @@ public class MainFrame extends JFrame implements ClockListener, KeyListener {
 	private int scrollSpeed = 1;
 	private FFTarray fftArrayLeft;
 	private FFTarray fftArrayRight;
+	private OscilloscopeArray oscilloLeft;
+	private OscilloscopeArray oscilloRight;
+	private PixelArray virgin;
 	
 	
 	public MainFrame() throws Exception {
@@ -85,19 +89,28 @@ public class MainFrame extends JFrame implements ClockListener, KeyListener {
 		BufferedImage bufferedImage = BufferedImageUtils.loadBufferedImage("resources/london.jpg");
 		String content = new String(Files.readAllBytes(Paths.get("resources/cv.txt")));
 		Module module = new Module(new java.io.FileInputStream("resources/12th_echo.mod"));
-
+		virgin = new PixelArray(800, 600, 0);
 		pixelArrayBackground = BufferedImageUtils.convertToPixelArray(bufferedImage, true);
 		setDataBufferUtil(new DataBufferUtil(bufferedImage.getRaster().getDataBuffer(), bufferedImage.getWidth(), bufferedImage.getHeight(), 0xFF00FF00));
 		metalFonts = new MetalFonts();
 		metalFonts.setTextToDisplay(content);
 		heightText = metalFonts.getHeightOfText();
-		
 		fftArrayLeft = new FFTarray();
 		fftArrayRight = new FFTarray();
 		fftArrayLeft.setPosX(10);
 		fftArrayLeft.setPosY(400);
 		fftArrayRight.setPosX(490);
 		fftArrayRight.setPosY(400);
+		
+		oscilloLeft = new OscilloscopeArray(300,400, 0);
+		oscilloLeft.setPosX(10);
+		oscilloLeft.setPosY(100);
+		
+		oscilloRight = new OscilloscopeArray(300, 400, 0);
+		oscilloRight.setPosX(490);
+		oscilloRight.setPosY(100);
+		
+		
 		
 		
 		setBufferedImage(bufferedImage);
@@ -127,10 +140,10 @@ public class MainFrame extends JFrame implements ClockListener, KeyListener {
 				}
 				if (soundData != null) {
 					int[][] rawPCM = SoundPcmUtils.transform(soundData, lengthSound);
-					leftSound = SoundPcmUtils.interpolate(60, rawPCM[0]);
-					rightSound = SoundPcmUtils.interpolate(60, rawPCM[1]);
-					leftSound = SoundPcmUtils.rescale(200, Short.MAX_VALUE, leftSound);
-					rightSound = SoundPcmUtils.rescale(200, Short.MAX_VALUE, rightSound);
+					leftSound = SoundPcmUtils.interpolate(300, rawPCM[0]);
+					rightSound = SoundPcmUtils.interpolate(300, rawPCM[1]);
+					oscilloLeft.drawOscillo(leftSound);
+					oscilloRight.drawOscillo(rightSound);
 					fftArrayLeft.processSoundData(rawPCM[0], lengthSound);
 					fftArrayRight.processSoundData(rawPCM[1], lengthSound);
 				}
@@ -155,22 +168,6 @@ public class MainFrame extends JFrame implements ClockListener, KeyListener {
 		int minSpeed = 0;
 		if (scrollSpeed > minSpeed) {
 			scrollSpeed--;
-		}
-	}
-
-	public synchronized void drawLines2(Graphics g, int origineX, int origineY, int width, int[] points) {
-		getDataBufferUtil().drawLine(origineX, origineY, origineX + width, origineY,0xffffffff);
-		if (points != null) {
-			int space = (int) Math.round((double) width / (double) points.length);
-			int x = origineX;
-			int y = origineY;
-			for (int i = 0; i < points.length; i++) {
-				int x2 = origineX + space * i;
-				int y2 = origineY + points[i];
-				g.drawLine(x, y, x2, y2);
-				x = x2;
-				y = y2;
-			}
 		}
 	}
 
@@ -237,14 +234,16 @@ public class MainFrame extends JFrame implements ClockListener, KeyListener {
 	}
 
 	private synchronized void render(Graphics g) {
-		getDataBufferUtil().copyToDataBuffer(pixelArrayBackground.getTable());
-		fftArrayLeft.write(getDataBufferUtil());
-		fftArrayRight.write(getDataBufferUtil());
-		metalFonts.write(getDataBufferUtil());
+		//getDataBufferUtil().copyToDataBuffer(pixelArrayBackground.getTable());
+		virgin.fillRectangleOfPixel(0, 0, 800, 600, pixelArrayBackground.getTable());
+		fftArrayLeft.write(virgin);
+		fftArrayRight.write(virgin);
+		metalFonts.write(virgin);
+		oscilloLeft.write(virgin);
+		oscilloRight.write(virgin);
+		getDataBufferUtil().copyToDataBuffer(virgin.getTable());
 		g.drawImage(getBufferedImage(), 0, 0, null);
 		g.setColor(Color.WHITE);
-		drawLines2(g, 10, 300, 300, leftSound);
-		drawLines2(g, 490, 300, 300, rightSound);
 		bufferStrategy.show();
 		g.dispose();
 	}
@@ -255,6 +254,8 @@ public class MainFrame extends JFrame implements ClockListener, KeyListener {
 		getDataBufferUtil().clear();
 		fftArrayLeft.clear();
 		fftArrayRight.clear();
+		oscilloLeft.clear();
+		oscilloRight.clear();
 	}
 
 	public void setBufferedImage(BufferedImage bufferedImage) {

@@ -41,9 +41,10 @@ public class SoundPcmUtils {
 
 	public static int[] rescale(int heightMax, int maxValue, int[] data) {
 		int[] result = new int[data.length];
+		int factor = (int) Math.round((double) maxValue / (double) heightMax);
 		double tmp = 0;
 		for (int i = 0; i < data.length; i++) {
-			tmp = ((double) data[i] / (double) maxValue) * (double) heightMax;
+			tmp = data[i] / factor;
 			result[i] = (int) Math.round(tmp);
 		}
 		return result;

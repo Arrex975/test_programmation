@@ -6,7 +6,7 @@ public class FFTarray extends AbstractPixelArray {
 	private int endColor = 0xFFFFFF00;
 	private int endFrequency = 4000;
 	private int[] gradients;
-	private int numberOfBars = 30;
+	private int numberOfBars = 60;
 	private int posX = 0;
 	private int posY = 0;
 
