@@ -154,4 +154,16 @@ public abstract class AbstractPixelArray implements IPixelArray {
 			}
 		}
 	}
+	
+	@Override
+	public void setPixel(int x, int y, int z, int color) {
+		double xd = (double) x;
+		double yd = (double) y;
+		double zd = (double) z;
+		x = (int) Math.round(xd/(zd+100d));
+		y = (int) Math.round(yd/(zd+100d));
+		setPixel(x, y, color);
+	}
+	
+	
 }

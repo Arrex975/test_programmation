@@ -9,18 +9,9 @@ public class DataBufferUtil extends AbstractPixelArray {
 		setWidth(width);
 		setHeight(height);
 		setBackgroundColor(color);
-		this.clear();
 	}
 
 	public synchronized void copyToDataBuffer(int[] array) {
 		System.arraycopy(array, 0, getTable(), 0, array.length);
-	}
-
-	public synchronized void copyToDataBuffer(int[] array, int transparentColor) {
-		for (int i = 0; i < getTable().length; i++) {
-			if (array[i] != transparentColor) {
-				getTable()[i] = array[i];
-			}
-		}
 	}
 }

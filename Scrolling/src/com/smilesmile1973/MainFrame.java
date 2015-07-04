@@ -59,7 +59,7 @@ public class MainFrame extends JFrame implements ClockListener, KeyListener {
 		super();
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		device = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
-		if (!device.isFullScreenSupported()) {
+		if (device.isFullScreenSupported()) {
 			setResizable(false);
 			setIgnoreRepaint(true);
 			setUndecorated(true);
@@ -86,7 +86,7 @@ public class MainFrame extends JFrame implements ClockListener, KeyListener {
 		validate();
 		BufferedImage bufferedImage = BufferedImageUtils.loadBufferedImage("resources/london.jpg");
 		String content = new String(Files.readAllBytes(Paths.get("resources/cv.txt")));
-		Module module = new Module(new java.io.FileInputStream("resources/12th_echo.mod"));
+		Module module = new Module(new java.io.FileInputStream("resources/big_beard.mod"));
 		pixelArrayBackground = BufferedImageUtils.convertToPixelArray(bufferedImage, true);
 		setDataBufferUtil(new DataBufferUtil(bufferedImage.getRaster().getDataBuffer(), bufferedImage.getWidth(), bufferedImage.getHeight(), 0xFF00FF00));
 		metalFonts = new MetalFonts();
@@ -228,6 +228,7 @@ public class MainFrame extends JFrame implements ClockListener, KeyListener {
 
 	}
 
+	boolean drawAlready = false;
 	private synchronized void render(Graphics g) {
 		// The display is here
 		g.drawImage(getBufferedImage(), 0, 0, null);
@@ -243,7 +244,6 @@ public class MainFrame extends JFrame implements ClockListener, KeyListener {
 		oscilloLeft.write(getDataBufferUtil());
 		oscilloRight.write(getDataBufferUtil());
 		render(bufferStrategy.getDrawGraphics());
-		getDataBufferUtil().clear();
 		getDataBufferUtil().copyToDataBuffer(pixelArrayBackground.getTable());
 		fftArrayLeft.clear();
 		fftArrayRight.clear();
