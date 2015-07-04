@@ -13,20 +13,21 @@ public abstract class AbstractPixelArray implements IPixelArray {
 		}
 	}
 
-	public void fillRectangleOfPixel(int x, int y, int width, int height, int[] arrayOfPixels) {
+	public synchronized void fillRectangleOfPixel(int x, int y, int width, int height, int[] arrayOfPixels) {
 		int c = 0;
 		for (int iy = y; iy < y + height; iy++) {
 			for (int ix = x; ix < x + width; ix++) {
-				setPixel(ix, iy, arrayOfPixels[c++]);
+				setPixel(ix, iy, arrayOfPixels[c]);
+				c++;
 			}
 		}
 	}
 
-	public int getBackgroundColor() {
+	public synchronized int getBackgroundColor() {
 		return backgroundColor;
 	}
 
-	public int[] getColumn(int x) {
+	public synchronized int[] getColumn(int x) {
 		int[] results = new int[getHeight()];
 		for (int i = 0; i < getHeight(); i++) {
 			results[i] = getPixel(x, i);
@@ -34,15 +35,15 @@ public abstract class AbstractPixelArray implements IPixelArray {
 		return results;
 	}
 
-	public int getHeight() {
+	public synchronized int getHeight() {
 		return height;
 	}
 
-	public int getPixel(int x, int y) {
+	public synchronized int getPixel(int x, int y) {
 		return table[x + y * getWidth()];
 	};
 
-	public int[] getRect(int x, int y, int width, int height) {
+	public synchronized int[] getRect(int x, int y, int width, int height) {
 		int[] results = new int[width * height];
 		int c = 0;
 		for (int iy = y; (iy < y + height); iy++) {
@@ -53,7 +54,7 @@ public abstract class AbstractPixelArray implements IPixelArray {
 		return results;
 	}
 
-	public int[] getRow(int y) {
+	public synchronized int[] getRow(int y) {
 		int[] results = new int[getWidth()];
 		for (int i = 0; i < getWidth(); i++) {
 			results[i] = getPixel(i, y);
@@ -61,15 +62,15 @@ public abstract class AbstractPixelArray implements IPixelArray {
 		return results;
 	}
 
-	public int[] getTable() {
+	public synchronized int[] getTable() {
 		return table;
 	}
 
-	public int getWidth() {
+	public synchronized int getWidth() {
 		return width;
 	}
 
-	public void setBackgroundColor(int backgroundColor) {
+	public synchronized void setBackgroundColor(int backgroundColor) {
 		this.backgroundColor = backgroundColor;
 	}
 
@@ -84,7 +85,7 @@ public abstract class AbstractPixelArray implements IPixelArray {
 	 *            position on the y axis.
 	 * @author marechal
 	 */
-	public void setPixel(int x, int y, int color) {
+	public synchronized void setPixel(int x, int y, int color) {
 		if ((color & 0xff000000) != 0) {
 			if (x < getWidth() && y < getHeight()) {
 				if (x >= 0 && y >= 0) {
@@ -94,11 +95,11 @@ public abstract class AbstractPixelArray implements IPixelArray {
 		}
 	}
 
-	public void setTable(int[] table) {
+	public synchronized void setTable(int[] table) {
 		this.table = table;
 	}
 
-	public void setTransparentForColor(int color) {
+	public synchronized void setTransparentForColor(int color) {
 		for (int i = 0; i < getTable().length; i++) {
 			int rgb = getTable()[i] & 0x00ffffff;
 			if (rgb == color) {
@@ -107,11 +108,11 @@ public abstract class AbstractPixelArray implements IPixelArray {
 		}
 	}
 
-	public void setWidth(int width) {
+	public synchronized void setWidth(int width) {
 		this.width = width;
 	}
 
-	public void setHeight(int height) {
+	public synchronized void setHeight(int height) {
 		this.height = height;
 	}
 
