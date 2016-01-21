@@ -11,9 +11,13 @@ import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ResourceBundle;
+import java.util.Scanner;
 
 import javax.swing.JFrame;
 
+import com.smilesmile1973.Clock;
+import com.smilesmile1973.ClockListener;
 import com.smilesmile1973.graphics.BufferedImageUtils;
 import com.smilesmile1973.graphics.DataBufferUtil;
 import com.smilesmile1973.graphics.FFTarray;
@@ -84,9 +88,10 @@ public class MainFrame extends JFrame implements ClockListener, KeyListener {
 		bufferStrategy = this.getBufferStrategy();
 		this.setBufferStrategy(bufferStrategy);
 		validate();
-		BufferedImage bufferedImage = BufferedImageUtils.loadBufferedImage("resources/london.jpg");
-		String content = new String(Files.readAllBytes(Paths.get("resources/cv.txt")));
-		Module module = new Module(new java.io.FileInputStream("resources/big_beard.mod"));
+		BufferedImage bufferedImage = BufferedImageUtils.loadBufferedImage("/london.jpg");
+		//String content = new String(Files.readAllBytes(Paths.get("resources/cv.txt")));
+		String content = new Scanner(MainFrame.class.getResourceAsStream("/cv.txt"),"UTF-8").useDelimiter("\\A").next();
+		Module module = new Module(MainFrame.class.getResourceAsStream("/big_beard.mod"));
 		pixelArrayBackground = BufferedImageUtils.convertToPixelArray(bufferedImage, true);
 		setDataBufferUtil(new DataBufferUtil(bufferedImage.getRaster().getDataBuffer(), bufferedImage.getWidth(), bufferedImage.getHeight(), 0xFF00FF00));
 		metalFonts = new MetalFonts();

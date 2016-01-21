@@ -5,13 +5,15 @@ import java.awt.image.ColorConvertOp;
 import java.awt.image.DataBufferInt;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 
 import javax.imageio.ImageIO;
 
 public class BufferedImageUtils {
 	public static BufferedImage convertToARGB(BufferedImage src) {
 		BufferedImage dest = new BufferedImage(src.getWidth(), src.getHeight(), BufferedImage.TYPE_INT_ARGB);
-		ColorConvertOp cco = new ColorConvertOp(src.getColorModel().getColorSpace(), dest.getColorModel().getColorSpace(), null);
+		ColorConvertOp cco = new ColorConvertOp(src.getColorModel().getColorSpace(),
+				dest.getColorModel().getColorSpace(), null);
 		cco.filter(src, dest);
 		System.out.println("Number of bands by pixel :" + dest.getRaster().getNumBands());
 		System.out.println("Number of data elements  :" + dest.getRaster().getNumDataElements());
@@ -30,7 +32,8 @@ public class BufferedImageUtils {
 	public static BufferedImage loadBufferedImage(String image) {
 		BufferedImage result = null;
 		try {
-			BufferedImage bufferedImage = ImageIO.read(new File(image));
+			InputStream in = BufferedImageUtils.class.getResourceAsStream(image);
+			BufferedImage bufferedImage = ImageIO.read(in);
 			result = convertToARGB(bufferedImage);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -45,7 +48,8 @@ public class BufferedImageUtils {
 		if (!clone) {
 			result.setTable(((DataBufferInt) image.getRaster().getDataBuffer()).getData());
 		} else {
-			System.arraycopy(((DataBufferInt) image.getRaster().getDataBuffer()).getData(), 0, result.getTable(), 0, result.getTable().length);
+			System.arraycopy(((DataBufferInt) image.getRaster().getDataBuffer()).getData(), 0, result.getTable(), 0,
+					result.getTable().length);
 		}
 		return result;
 	}

@@ -1,6 +1,7 @@
 package com.smilesmile1973.graphics;
 
 import java.awt.image.BufferedImage;
+import java.io.InputStream;
 import java.util.TreeMap;
 
 public class MetalFonts {
@@ -43,7 +44,7 @@ public class MetalFonts {
 
 	public MetalFonts() {
 		try {
-			BufferedImage bufferedImage = BufferedImageUtils.loadBufferedImage("resources/MetalFonts.png");
+			BufferedImage bufferedImage = BufferedImageUtils.loadBufferedImage("/MetalFonts.png");
 			PixelArray pixelArray = BufferedImageUtils.convertToPixelArray(bufferedImage, true);
 			pixelArray.setTransparentForColor(0x000000);
 			int c = 0;
