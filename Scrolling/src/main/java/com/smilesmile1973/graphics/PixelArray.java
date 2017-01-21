@@ -1,7 +1,7 @@
 package com.smilesmile1973.graphics;
 
 public class PixelArray extends AbstractPixelArray {
-	
+
 	private int[] down = new int[1];
 
 	int[] left = new int[1];
@@ -42,9 +42,9 @@ public class PixelArray extends AbstractPixelArray {
 		if (tmpLeft == null || tmpLeft.length != (getTable().length - number)) {
 			tmpLeft = new int[getTable().length - number];
 		}
-		int tmpLength = getWidth() - number;
+		final int tmpLength = getWidth() - number;
 		int rowNumber = 0;
-		int width = getWidth();
+		final int width = getWidth();
 		for (int y = 0; y < getHeight(); y++) {
 			rowNumber = y * getWidth();
 			System.arraycopy(getTable(), rowNumber, left, 0, number);
@@ -61,9 +61,9 @@ public class PixelArray extends AbstractPixelArray {
 		if (getTable().length != number) {
 			tmpRight = new int[getTable().length - number];
 		}
-		int tmpLength = getWidth() - number;
+		final int tmpLength = getWidth() - number;
 		int rowNumber = 0;
-		int width = getWidth();
+		final int width = getWidth();
 		for (int y = 0; y < getHeight(); y++) {
 			rowNumber = y * getWidth();
 			System.arraycopy(getTable(), rowNumber + width - number, right, 0, number);

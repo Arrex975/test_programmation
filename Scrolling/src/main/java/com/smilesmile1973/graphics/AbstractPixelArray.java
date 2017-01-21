@@ -8,11 +8,15 @@ public abstract class AbstractPixelArray implements IPixelArray {
 
 	@Override
 	public void clear() {
-		for (int i = 0; i < getTable().length; i++) {
-			getTable()[i] = backgroundColor;
+		final int[] table = getTable();
+		table[0] = backgroundColor;
+		final int length = getTable().length;
+		for (int i = 1; i < length; i+=i) {
+			System.arraycopy( table, 0, table, i, ((length - i) < i) ? (length - i) : i);
 		}
 	}
 
+	@Override
 	public synchronized void fillRectangleOfPixel(int x, int y, int width, int height, int[] arrayOfPixels) {
 		int c = 0;
 		for (int iy = y; iy < y + height; iy++) {
@@ -23,53 +27,62 @@ public abstract class AbstractPixelArray implements IPixelArray {
 		}
 	}
 
+	@Override
 	public synchronized int getBackgroundColor() {
 		return backgroundColor;
 	}
 
+	@Override
 	public synchronized int[] getColumn(int x) {
-		int[] results = new int[getHeight()];
+		final int[] results = new int[getHeight()];
 		for (int i = 0; i < getHeight(); i++) {
 			results[i] = getPixel(x, i);
 		}
 		return results;
 	}
 
+	@Override
 	public synchronized int getHeight() {
 		return height;
 	}
 
+	@Override
 	public synchronized int getPixel(int x, int y) {
 		return table[x + y * getWidth()];
 	};
 
+	@Override
 	public synchronized int[] getRect(int x, int y, int width, int height) {
-		int[] results = new int[width * height];
+		final int[] results = new int[width * height];
 		int c = 0;
-		for (int iy = y; (iy < y + height); iy++) {
-			for (int ix = x; ix < (x + width); ix++) {
-				results[c++] = getPixel(ix, iy);
-			}
+		for (int iy = y; iy < (y + height); iy++) {
+			System.arraycopy(table,iy*getWidth()+x,results,c, width);
+			c = c + width;
 		}
+
 		return results;
 	}
 
+	@Override
 	public synchronized int[] getRow(int y) {
-		int[] results = new int[getWidth()];
+		final int[] results = new int[getWidth()];
 		for (int i = 0; i < getWidth(); i++) {
 			results[i] = getPixel(i, y);
 		}
 		return results;
 	}
 
+	@Override
 	public synchronized int[] getTable() {
 		return table;
 	}
 
+	@Override
 	public synchronized int getWidth() {
 		return width;
 	}
 
+	@Override
 	public synchronized void setBackgroundColor(int backgroundColor) {
 		this.backgroundColor = backgroundColor;
 	}
@@ -78,13 +91,14 @@ public abstract class AbstractPixelArray implements IPixelArray {
 	 * This method will write a pixel at x and y.<br>
 	 * If x >= 0 and x < {@link #getWidth()}<br>
 	 * If y >= 0 and y < {@link #getHeight()}<br>
-	 * 
+	 *
 	 * @param x
 	 *            position on the x axis.
 	 * @param y
 	 *            position on the y axis.
 	 * @author marechal
 	 */
+	@Override
 	public synchronized void setPixel(int x, int y, int color) {
 		if ((color & 0xff000000) != 0) {
 			if (x < getWidth() && y < getHeight()) {
@@ -95,38 +109,43 @@ public abstract class AbstractPixelArray implements IPixelArray {
 		}
 	}
 
+	@Override
 	public synchronized void setTable(int[] table) {
 		this.table = table;
 	}
 
+	@Override
 	public synchronized void setTransparentForColor(int color) {
 		for (int i = 0; i < getTable().length; i++) {
-			int rgb = getTable()[i] & 0x00ffffff;
+			final int rgb = getTable()[i] & 0x00ffffff;
 			if (rgb == color) {
 				getTable()[i] = color;
 			}
 		}
 	}
 
+	@Override
 	public synchronized void setWidth(int width) {
 		this.width = width;
 	}
 
+	@Override
 	public synchronized void setHeight(int height) {
 		this.height = height;
 	}
 
+	@Override
 	public synchronized void drawLine(int x1, int y1, int x2, int y2, int color) {
 		int d = 0;
 
-		int dy = Math.abs(y2 - y1);
-		int dx = Math.abs(x2 - x1);
+		final int dy = Math.abs(y2 - y1);
+		final int dx = Math.abs(x2 - x1);
 
-		int dy2 = (dy << 1); // slope scaling factors to avoid floating
-		int dx2 = (dx << 1); // point
+		final int dy2 = (dy << 1); // slope scaling factors to avoid floating
+		final int dx2 = (dx << 1); // point
 
-		int ix = x1 < x2 ? 1 : -1; // increment direction
-		int iy = y1 < y2 ? 1 : -1;
+		final int ix = x1 < x2 ? 1 : -1; // increment direction
+		final int iy = y1 < y2 ? 1 : -1;
 
 		if (dy <= dx) {
 			for (;;) {
@@ -154,16 +173,4 @@ public abstract class AbstractPixelArray implements IPixelArray {
 			}
 		}
 	}
-	
-	@Override
-	public void setPixel(int x, int y, int z, int color) {
-		double xd = (double) x;
-		double yd = (double) y;
-		double zd = (double) z;
-		x = (int) Math.round(xd/(zd+100d));
-		y = (int) Math.round(yd/(zd+100d));
-		setPixel(x, y, color);
-	}
-	
-	
 }

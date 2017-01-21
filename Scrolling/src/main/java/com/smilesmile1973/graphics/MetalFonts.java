@@ -1,14 +1,13 @@
 package com.smilesmile1973.graphics;
 
 import java.awt.image.BufferedImage;
-import java.io.InputStream;
 import java.util.TreeMap;
 
 public class MetalFonts {
-	private int width = 32;
-	private int height = 32;
-	private int interLine = 3;
-	private TreeMap<String, int[]> fontsMap = new TreeMap<String, int[]>();
+	private final int width = 32;
+	private final int height = 32;
+	private final int interLine = 3;
+	private final TreeMap<String, int[]> fontsMap = new TreeMap<String, int[]>();
 	private int posX;
 	public int getPosX() {
 		return posX;
@@ -36,7 +35,7 @@ public class MetalFonts {
 	public void setTextToDisplay(String textToDisplay) {
 		this.textToDisplay = textToDisplay;
 	}
-	
+
 	public void setPosXPosy(int posX, int posY){
 		this.posX =posX;
 		this.posY = posY;
@@ -44,8 +43,8 @@ public class MetalFonts {
 
 	public MetalFonts() {
 		try {
-			BufferedImage bufferedImage = BufferedImageUtils.loadBufferedImage("/MetalFonts.png");
-			PixelArray pixelArray = BufferedImageUtils.convertToPixelArray(bufferedImage, true);
+			final BufferedImage bufferedImage = BufferedImageUtils.loadBufferedImage("/MetalFonts.png");
+			final PixelArray pixelArray = BufferedImageUtils.convertToPixelArray(bufferedImage, true);
 			pixelArray.setTransparentForColor(0x000000);
 			int c = 0;
 			int d = 0;
@@ -101,36 +100,36 @@ public class MetalFonts {
 			fontsMap.put("(", pixelArray.getRect(c+=32, d, width, height));
 			fontsMap.put(")", pixelArray.getRect(c+=32, d, width, height));
 			fontsMap.put("'", pixelArray.getRect(c+=32, d, width, height));
-		} catch (Exception e) {
+		} catch (final Exception e) {
 		}
 	}
-	
+
 	public void moveUp(int speed){
 		setPosXPosy(posX,posY-speed);
 	}
-	
+
 	public void moveDown(int speed){
 		setPosXPosy(posX,posY+speed);
 	}
-	
+
 	public int getHeightOfText(){
 		int result = 0;
 		for (int i = 0; i < getTextToDisplay().length();i++){
-			char tmpChar = getTextToDisplay().charAt(i);
+			final char tmpChar = getTextToDisplay().charAt(i);
 			if(tmpChar == '\n'){
 				result = result + height + interLine;
 			}
 		}
 		return result;
 	}
-	
+
 	public void write(IPixelArray out){
 		int x=posX;
 		int y=posY;
-		int tmpX = x;
+		final int tmpX = x;
 		int[] tmp = null;
 		for (int i = 0; i < getTextToDisplay().length();i++){
-			char tmpChar = getTextToDisplay().charAt(i);
+			final char tmpChar = getTextToDisplay().charAt(i);
 			if(tmpChar == '\n'){
 				y = y + height + interLine;
 				x = tmpX;
@@ -140,7 +139,7 @@ public class MetalFonts {
 					out.fillRectangleOfPixel(x, y,width,height,tmp);
 				}
 				x = x + width;
-			}	
+			}
 		}
 	}
 }

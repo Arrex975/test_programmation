@@ -40,7 +40,8 @@ public class Complex {
     }
 
     // return a string representation of the invoking Complex object
-    public String toString() {
+    @Override
+	public String toString() {
         if (im == 0) return re + "";
         if (re == 0) return im + "i";
         if (im <  0) return re + " - " + (-im) + "i";
@@ -53,25 +54,25 @@ public class Complex {
 
     // return a new Complex object whose value is (this + b)
     public Complex plus(Complex b) {
-        Complex a = this;             // invoking object
-        double real = a.re + b.re;
-        double imag = a.im + b.im;
+        final Complex a = this;             // invoking object
+        final double real = a.re + b.re;
+        final double imag = a.im + b.im;
         return new Complex(real, imag);
     }
 
     // return a new Complex object whose value is (this - b)
     public Complex minus(Complex b) {
-        Complex a = this;
-        double real = a.re - b.re;
-        double imag = a.im - b.im;
+        final Complex a = this;
+        final double real = a.re - b.re;
+        final double imag = a.im - b.im;
         return new Complex(real, imag);
     }
 
     // return a new Complex object whose value is (this * b)
     public Complex times(Complex b) {
-        Complex a = this;
-        double real = a.re * b.re - a.im * b.im;
-        double imag = a.re * b.im + a.im * b.re;
+        final Complex a = this;
+        final double real = a.re * b.re - a.im * b.im;
+        final double imag = a.re * b.im + a.im * b.re;
         return new Complex(real, imag);
     }
 
@@ -86,7 +87,7 @@ public class Complex {
 
     // return a new Complex object whose value is the reciprocal of this
     public Complex reciprocal() {
-        double scale = re*re + im*im;
+        final double scale = re*re + im*im;
         return new Complex(re / scale, -im / scale);
     }
 
@@ -96,7 +97,7 @@ public class Complex {
 
     // return a / b
     public Complex divides(Complex b) {
-        Complex a = this;
+        final Complex a = this;
         return a.times(b.reciprocal());
     }
 
@@ -119,14 +120,14 @@ public class Complex {
     public Complex tan() {
         return sin().divides(cos());
     }
-    
+
 
 
     // a static version of plus
     public static Complex plus(Complex a, Complex b) {
-        double real = a.re + b.re;
-        double imag = a.im + b.im;
-        Complex sum = new Complex(real, imag);
+        final double real = a.re + b.re;
+        final double imag = a.im + b.im;
+        final Complex sum = new Complex(real, imag);
         return sum;
     }
 
@@ -134,8 +135,8 @@ public class Complex {
 
     // sample client for testing
     public static void main(String[] args) {
-        Complex a = new Complex(5.0, 6.0);
-        Complex b = new Complex(-3.0, 4.0);
+        final Complex a = new Complex(5.0, 6.0);
+        final Complex b = new Complex(-3.0, 4.0);
         System.out.println("a            = " + a);
         System.out.println("b            = " + b);
         System.out.println("Re(a)        = " + a.re());

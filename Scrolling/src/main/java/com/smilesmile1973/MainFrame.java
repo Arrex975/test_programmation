@@ -9,15 +9,10 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ResourceBundle;
 import java.util.Scanner;
 
 import javax.swing.JFrame;
 
-import com.smilesmile1973.Clock;
-import com.smilesmile1973.ClockListener;
 import com.smilesmile1973.graphics.BufferedImageUtils;
 import com.smilesmile1973.graphics.DataBufferUtil;
 import com.smilesmile1973.graphics.FFTarray;
@@ -31,7 +26,7 @@ import com.smilesmile1973.micromod.PlayerListener;
 
 public class MainFrame extends JFrame implements ClockListener, KeyListener {
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = -7542561518577030491L;
 
@@ -43,21 +38,21 @@ public class MainFrame extends JFrame implements ClockListener, KeyListener {
 	private BufferedImage bufferedImage;
 	private BufferStrategy bufferStrategy;
 	private DataBufferUtil dataBufferUtil;
-	private GraphicsDevice device;
+	private final GraphicsDevice device;
 	private int direction = 0;
-	private int heightText;
+	private final int heightText;
 	private int keyPressed;
-	private MetalFonts metalFonts;
-	private PixelArray pixelArrayBackground;
+	private final MetalFonts metalFonts;
+	private final PixelArray pixelArrayBackground;
 	private int[] leftSound;
 	private int[] rightSound;
 	private int[] soundData;
 	private int lengthSound;
 	private int scrollSpeed = 1;
-	private FFTarray fftArrayLeft;
-	private FFTarray fftArrayRight;
-	private OscilloscopeArray oscilloLeft;
-	private OscilloscopeArray oscilloRight;
+	private final FFTarray fftArrayLeft;
+	private final FFTarray fftArrayRight;
+	private final OscilloscopeArray oscilloLeft;
+	private final OscilloscopeArray oscilloRight;
 
 	public MainFrame() throws Exception {
 		super();
@@ -81,17 +76,17 @@ public class MainFrame extends JFrame implements ClockListener, KeyListener {
 			this.setVisible(true);
 		}
 		if (device.isDisplayChangeSupported()) {
-			DisplayMode displayMode = new DisplayMode(800, 600, 32, 60);
+			final DisplayMode displayMode = new DisplayMode(800, 600, 32, 60);
 			device.setDisplayMode(displayMode);
 		}
 		this.createBufferStrategy(2);
 		bufferStrategy = this.getBufferStrategy();
 		this.setBufferStrategy(bufferStrategy);
 		validate();
-		BufferedImage bufferedImage = BufferedImageUtils.loadBufferedImage("/london.jpg");
+		final BufferedImage bufferedImage = BufferedImageUtils.loadBufferedImage("/london.jpg");
 		//String content = new String(Files.readAllBytes(Paths.get("resources/cv.txt")));
-		String content = new Scanner(MainFrame.class.getResourceAsStream("/cv.txt"),"UTF-8").useDelimiter("\\A").next();
-		Module module = new Module(MainFrame.class.getResourceAsStream("/big_beard.mod"));
+		final String content = new Scanner(MainFrame.class.getResourceAsStream("/cv.txt"),"UTF-8").useDelimiter("\\A").next();
+		final Module module = new Module(MainFrame.class.getResourceAsStream("/big_beard.mod"));
 		pixelArrayBackground = BufferedImageUtils.convertToPixelArray(bufferedImage, true);
 		setDataBufferUtil(new DataBufferUtil(bufferedImage.getRaster().getDataBuffer(), bufferedImage.getWidth(), bufferedImage.getHeight(), 0xFF00FF00));
 		metalFonts = new MetalFonts();
@@ -113,8 +108,8 @@ public class MainFrame extends JFrame implements ClockListener, KeyListener {
 		oscilloRight.setPosY(100);
 
 		setBufferedImage(bufferedImage);
-		Clock refreshScreenClock = new Clock(1000 / 60);
-		Clock prepareClock = new Clock(1000 / 100);
+		final Clock refreshScreenClock = new Clock(1000 / 100);
+		final Clock prepareClock = new Clock(1000 / 100);
 		refreshScreenClock.addClockListener(this);
 		prepareClock.addClockListener(new ClockListener() {
 			@Override
@@ -138,7 +133,7 @@ public class MainFrame extends JFrame implements ClockListener, KeyListener {
 					break;
 				}
 				if (soundData != null) {
-					int[][] rawPCM = SoundPcmUtils.transform(soundData, lengthSound);
+					final int[][] rawPCM = SoundPcmUtils.transform(soundData, lengthSound);
 					leftSound = SoundPcmUtils.interpolate(300, rawPCM[0]);
 					rightSound = SoundPcmUtils.interpolate(300, rawPCM[1]);
 					oscilloLeft.drawOscillo(leftSound);
@@ -152,8 +147,8 @@ public class MainFrame extends JFrame implements ClockListener, KeyListener {
 		this.addKeyListener(this);
 		// Music
 
-		Player player = new Player(module, false, true);
-		Thread threadPlayer = new Thread(player);
+		final Player player = new Player(module, false, true);
+		final Thread threadPlayer = new Thread(player);
 		player.addPlayerListener(new PlayerListener() {
 			@Override
 			public synchronized void processFrequency(int[] data, int length) {
@@ -165,7 +160,7 @@ public class MainFrame extends JFrame implements ClockListener, KeyListener {
 	}
 
 	public void decScrollSpeed() {
-		int minSpeed = 0;
+		final int minSpeed = 0;
 		if (scrollSpeed > minSpeed) {
 			scrollSpeed--;
 		}
@@ -188,7 +183,7 @@ public class MainFrame extends JFrame implements ClockListener, KeyListener {
 	}
 
 	public void incScrollSpeed() {
-		int maxSpeed = 200;
+		final int maxSpeed = 200;
 		if (scrollSpeed < maxSpeed) {
 			scrollSpeed++;
 		}

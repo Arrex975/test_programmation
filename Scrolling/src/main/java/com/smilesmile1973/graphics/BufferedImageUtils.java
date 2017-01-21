@@ -3,7 +3,6 @@ package com.smilesmile1973.graphics;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorConvertOp;
 import java.awt.image.DataBufferInt;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -11,8 +10,8 @@ import javax.imageio.ImageIO;
 
 public class BufferedImageUtils {
 	public static BufferedImage convertToARGB(BufferedImage src) {
-		BufferedImage dest = new BufferedImage(src.getWidth(), src.getHeight(), BufferedImage.TYPE_INT_ARGB);
-		ColorConvertOp cco = new ColorConvertOp(src.getColorModel().getColorSpace(),
+		final BufferedImage dest = new BufferedImage(src.getWidth(), src.getHeight(), BufferedImage.TYPE_INT_ARGB);
+		final ColorConvertOp cco = new ColorConvertOp(src.getColorModel().getColorSpace(),
 				dest.getColorModel().getColorSpace(), null);
 		cco.filter(src, dest);
 		System.out.println("Number of bands by pixel :" + dest.getRaster().getNumBands());
@@ -32,10 +31,10 @@ public class BufferedImageUtils {
 	public static BufferedImage loadBufferedImage(String image) {
 		BufferedImage result = null;
 		try {
-			InputStream in = BufferedImageUtils.class.getResourceAsStream(image);
-			BufferedImage bufferedImage = ImageIO.read(in);
+			final InputStream in = BufferedImageUtils.class.getResourceAsStream(image);
+			final BufferedImage bufferedImage = ImageIO.read(in);
 			result = convertToARGB(bufferedImage);
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
