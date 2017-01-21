@@ -11,8 +11,8 @@ public abstract class AbstractPixelArray implements IPixelArray {
 		final int[] table = getTable();
 		table[0] = backgroundColor;
 		final int length = getTable().length;
-		for (int i = 1; i < length; i+=i) {
-			System.arraycopy( table, 0, table, i, ((length - i) < i) ? (length - i) : i);
+		for (int i = 1; i < length; i += i) {
+			System.arraycopy(table, 0, table, i, ((length - i) < i) ? (length - i) : i);
 		}
 	}
 
@@ -56,7 +56,7 @@ public abstract class AbstractPixelArray implements IPixelArray {
 		final int[] results = new int[width * height];
 		int c = 0;
 		for (int iy = y; iy < (y + height); iy++) {
-			System.arraycopy(table,iy*getWidth()+x,results,c, width);
+			System.arraycopy(table, iy * getWidth() + x, results, c, width);
 			c = c + width;
 		}
 
