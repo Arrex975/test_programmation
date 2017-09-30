@@ -14,6 +14,7 @@ import java.util.Scanner;
 
 import javax.swing.JFrame;
 
+import com.smilesmile1973.graphics.BitmapFont;
 import com.smilesmile1973.graphics.BufferedImageUtils;
 import com.smilesmile1973.graphics.DataBufferUtil;
 import com.smilesmile1973.graphics.FFTarray;
@@ -49,7 +50,7 @@ public class MainFrame extends JFrame implements Runnable, KeyListener {
 	private int keyPressed;
 	private int[] leftSound;
 	private int lengthSound;
-	private final XenonFonts fonts;
+	private final BitmapFont fonts;
 	private final OscilloscopeArray oscilloLeft;
 	private final OscilloscopeArray oscilloRight;
 	private final PixelArray pixelArrayBackground;
