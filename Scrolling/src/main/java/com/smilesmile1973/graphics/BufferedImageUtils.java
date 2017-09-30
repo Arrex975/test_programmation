@@ -28,19 +28,6 @@ public class BufferedImageUtils {
 		return dest;
 	}
 
-	public static BufferedImage loadBufferedImage(String image) {
-		BufferedImage result = null;
-		try {
-			final InputStream in = BufferedImageUtils.class.getResourceAsStream(image);
-			final BufferedImage bufferedImage = ImageIO.read(in);
-			result = convertToARGB(bufferedImage);
-		} catch (final IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return result;
-	}
-
 	public static PixelArray convertToPixelArray(BufferedImage image, boolean clone) {
 		PixelArray result = null;
 		result = new PixelArray(image.getWidth(), image.getHeight(), 0);
@@ -49,6 +36,18 @@ public class BufferedImageUtils {
 		} else {
 			System.arraycopy(((DataBufferInt) image.getRaster().getDataBuffer()).getData(), 0, result.getTable(), 0,
 					result.getTable().length);
+		}
+		return result;
+	}
+
+	public static BufferedImage loadBufferedImage(String image) {
+		BufferedImage result = null;
+		try {
+			final InputStream in = BufferedImageUtils.class.getResourceAsStream(image);
+			final BufferedImage bufferedImage = ImageIO.read(in);
+			result = convertToARGB(bufferedImage);
+		} catch (final IOException e) {
+			e.printStackTrace();
 		}
 		return result;
 	}

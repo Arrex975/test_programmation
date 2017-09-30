@@ -1,5 +1,7 @@
 package com.smilesmile1973.graphics;
 
+import java.util.Arrays;
+
 public abstract class AbstractPixelArray implements IPixelArray {
 	private int[] table = null;
 	private int backgroundColor = 0;
@@ -9,10 +11,46 @@ public abstract class AbstractPixelArray implements IPixelArray {
 	@Override
 	public void clear() {
 		final int[] table = getTable();
-		table[0] = backgroundColor;
-		final int length = getTable().length;
-		for (int i = 1; i < length; i += i) {
-			System.arraycopy(table, 0, table, i, ((length - i) < i) ? (length - i) : i);
+		Arrays.fill(table, backgroundColor);
+	}
+
+	@Override
+	public synchronized void drawLine(int x1, int y1, int x2, int y2, int color) {
+		int d = 0;
+
+		final int dy = Math.abs(y2 - y1);
+		final int dx = Math.abs(x2 - x1);
+
+		final int dy2 = (dy << 1); // slope scaling factors to avoid floating
+		final int dx2 = (dx << 1); // point
+
+		final int ix = x1 < x2 ? 1 : -1; // increment direction
+		final int iy = y1 < y2 ? 1 : -1;
+
+		if (dy <= dx) {
+			for (;;) {
+				setPixel(x1, y1, color);
+				if (x1 == x2)
+					break;
+				x1 += ix;
+				d += dy2;
+				if (d > dx) {
+					y1 += iy;
+					d -= dx2;
+				}
+			}
+		} else {
+			for (;;) {
+				setPixel(x1, y1, color);
+				if (y1 == y2)
+					break;
+				y1 += iy;
+				d += dx2;
+				if (d > dy) {
+					x1 += ix;
+					d -= dy2;
+				}
+			}
 		}
 	}
 
@@ -44,12 +82,12 @@ public abstract class AbstractPixelArray implements IPixelArray {
 	@Override
 	public synchronized int getHeight() {
 		return height;
-	}
+	};
 
 	@Override
 	public synchronized int getPixel(int x, int y) {
 		return table[x + y * getWidth()];
-	};
+	}
 
 	@Override
 	public synchronized int[] getRect(int x, int y, int width, int height) {
@@ -85,6 +123,11 @@ public abstract class AbstractPixelArray implements IPixelArray {
 	@Override
 	public synchronized void setBackgroundColor(int backgroundColor) {
 		this.backgroundColor = backgroundColor;
+	}
+
+	@Override
+	public synchronized void setHeight(int height) {
+		this.height = height;
 	}
 
 	/**
@@ -127,50 +170,5 @@ public abstract class AbstractPixelArray implements IPixelArray {
 	@Override
 	public synchronized void setWidth(int width) {
 		this.width = width;
-	}
-
-	@Override
-	public synchronized void setHeight(int height) {
-		this.height = height;
-	}
-
-	@Override
-	public synchronized void drawLine(int x1, int y1, int x2, int y2, int color) {
-		int d = 0;
-
-		final int dy = Math.abs(y2 - y1);
-		final int dx = Math.abs(x2 - x1);
-
-		final int dy2 = (dy << 1); // slope scaling factors to avoid floating
-		final int dx2 = (dx << 1); // point
-
-		final int ix = x1 < x2 ? 1 : -1; // increment direction
-		final int iy = y1 < y2 ? 1 : -1;
-
-		if (dy <= dx) {
-			for (;;) {
-				setPixel(x1, y1, color);
-				if (x1 == x2)
-					break;
-				x1 += ix;
-				d += dy2;
-				if (d > dx) {
-					y1 += iy;
-					d -= dx2;
-				}
-			}
-		} else {
-			for (;;) {
-				setPixel(x1, y1, color);
-				if (y1 == y2)
-					break;
-				y1 += iy;
-				d += dx2;
-				if (d > dy) {
-					x1 += ix;
-					d -= dy2;
-				}
-			}
-		}
 	}
 }

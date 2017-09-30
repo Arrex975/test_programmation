@@ -24,7 +24,7 @@ import com.smilesmile1973.micromod.Module;
 import com.smilesmile1973.micromod.Player;
 import com.smilesmile1973.micromod.PlayerListener;
 
-public class MainFrame extends JFrame implements ClockListener, KeyListener {
+public class MainFrame extends JFrame implements Runnable, KeyListener {
 	/**
 	 *
 	 */
@@ -37,22 +37,26 @@ public class MainFrame extends JFrame implements ClockListener, KeyListener {
 	double[] amplitudes;
 	private BufferedImage bufferedImage;
 	private BufferStrategy bufferStrategy;
+	long cycleTime;
 	private DataBufferUtil dataBufferUtil;
 	private final GraphicsDevice device;
 	private int direction = 0;
-	private final int heightText;
-	private int keyPressed;
-	private final MetalFonts metalFonts;
-	private final PixelArray pixelArrayBackground;
-	private int[] leftSound;
-	private int[] rightSound;
-	private int[] soundData;
-	private int lengthSound;
-	private int scrollSpeed = 1;
+	boolean drawAlready = false;
 	private final FFTarray fftArrayLeft;
 	private final FFTarray fftArrayRight;
+	private final int heightText;
+	private int keyPressed;
+	private int[] leftSound;
+	private int lengthSound;
+	private final MetalFonts metalFonts;
 	private final OscilloscopeArray oscilloLeft;
 	private final OscilloscopeArray oscilloRight;
+	private final PixelArray pixelArrayBackground;
+	Player player ;
+	private int[] rightSound;
+	private int scrollSpeed = 1;
+
+	private int[] soundData;
 
 	public MainFrame() throws Exception {
 		super();
@@ -86,7 +90,7 @@ public class MainFrame extends JFrame implements ClockListener, KeyListener {
 		final BufferedImage bufferedImage = BufferedImageUtils.loadBufferedImage("/london.jpg");
 		//String content = new String(Files.readAllBytes(Paths.get("resources/cv.txt")));
 		final String content = new Scanner(MainFrame.class.getResourceAsStream("/cv.txt"),"UTF-8").useDelimiter("\\A").next();
-		final Module module = new Module(MainFrame.class.getResourceAsStream("/big_beard.mod"));
+		
 		pixelArrayBackground = BufferedImageUtils.convertToPixelArray(bufferedImage, true);
 		setDataBufferUtil(new DataBufferUtil(bufferedImage.getRaster().getDataBuffer(), bufferedImage.getWidth(), bufferedImage.getHeight(), 0xFF00FF00));
 		metalFonts = new MetalFonts();
@@ -108,9 +112,10 @@ public class MainFrame extends JFrame implements ClockListener, KeyListener {
 		oscilloRight.setPosY(100);
 
 		setBufferedImage(bufferedImage);
-		final Clock refreshScreenClock = new Clock(1000 / 100);
-		final Clock prepareClock = new Clock(1000 / 100);
-		refreshScreenClock.addClockListener(this);
+		//final Clock refreshScreenClock = new Clock(1000 / 100);
+		final Clock prepareClock = new Clock(1000 / 100 );
+		Thread loop = new Thread(this);
+		//refreshScreenClock.addClockListener(this);
 		prepareClock.addClockListener(new ClockListener() {
 			@Override
 			public void runMe() {
@@ -132,22 +137,13 @@ public class MainFrame extends JFrame implements ClockListener, KeyListener {
 					}
 					break;
 				}
-				if (soundData != null) {
-					final int[][] rawPCM = SoundPcmUtils.transform(soundData, lengthSound);
-					leftSound = SoundPcmUtils.interpolate(300, rawPCM[0]);
-					rightSound = SoundPcmUtils.interpolate(300, rawPCM[1]);
-					oscilloLeft.drawOscillo(leftSound);
-					oscilloRight.drawOscillo(rightSound);
-					fftArrayLeft.processSoundData(rawPCM[0], lengthSound);
-					fftArrayRight.processSoundData(rawPCM[1], lengthSound);
-				}
 			}
 
 		});
 		this.addKeyListener(this);
 		// Music
-
-		final Player player = new Player(module, false, true);
+		final Module module = new Module(MainFrame.class.getResourceAsStream("/big_beard.mod"));
+		player = new Player(module, false, true);
 		final Thread threadPlayer = new Thread(player);
 		player.addPlayerListener(new PlayerListener() {
 			@Override
@@ -157,6 +153,7 @@ public class MainFrame extends JFrame implements ClockListener, KeyListener {
 			}
 		});
 		threadPlayer.start();
+		loop.start();
 	}
 
 	public void decScrollSpeed() {
@@ -227,28 +224,23 @@ public class MainFrame extends JFrame implements ClockListener, KeyListener {
 		// TODO Auto-generated method stub
 
 	}
-
-	boolean drawAlready = false;
 	private synchronized void render(Graphics g) {
 		// The display is here
 		g.drawImage(getBufferedImage(), 0, 0, null);
 		bufferStrategy.show();
 		g.dispose();
 	}
-
+	
+	
 	@Override
-	public void runMe() {
-		fftArrayLeft.write(getDataBufferUtil());
-		fftArrayRight.write(getDataBufferUtil());
-		metalFonts.write(getDataBufferUtil());
-		oscilloLeft.write(getDataBufferUtil());
-		oscilloRight.write(getDataBufferUtil());
-		render(bufferStrategy.getDrawGraphics());
-		getDataBufferUtil().copyToDataBuffer(pixelArrayBackground.getTable());
-		fftArrayLeft.clear();
-		fftArrayRight.clear();
-		oscilloLeft.clear();
-		oscilloRight.clear();
+	public void run() {
+		cycleTime = System.currentTimeMillis();
+		BufferStrategy strategy = getBufferStrategy();
+		while (true) {
+			updateGui(strategy);
+			synchFramerate();
+		}
+		
 	}
 
 	public void setBufferedImage(BufferedImage bufferedImage) {
@@ -269,5 +261,40 @@ public class MainFrame extends JFrame implements ClockListener, KeyListener {
 
 	public void setScrollSpeed(int scrollSpeed) {
 		this.scrollSpeed = scrollSpeed;
+	}
+
+	private void synchFramerate() {
+		cycleTime = cycleTime + 20;
+		long difference = cycleTime - System.currentTimeMillis();
+		try {
+			Thread.sleep(Math.max(0, difference));
+		}
+		catch(InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	//@Override
+	public void updateGui(BufferStrategy bufferStrategy) {
+		if (soundData != null) {
+			final int[][] rawPCM = SoundPcmUtils.transform(soundData, lengthSound);
+			leftSound = SoundPcmUtils.interpolate(300, rawPCM[0]);
+			rightSound = SoundPcmUtils.interpolate(300, rawPCM[1]);
+			oscilloLeft.drawOscillo(leftSound);
+			oscilloRight.drawOscillo(rightSound);
+			fftArrayLeft.processSoundData(rawPCM[0], lengthSound);
+			fftArrayRight.processSoundData(rawPCM[1], lengthSound);
+		}
+		fftArrayLeft.write(getDataBufferUtil());
+		fftArrayRight.write(getDataBufferUtil());
+		oscilloLeft.write(getDataBufferUtil());
+		oscilloRight.write(getDataBufferUtil());
+		metalFonts.write(getDataBufferUtil());
+		fftArrayLeft.clear();
+		fftArrayRight.clear();
+		oscilloLeft.clear();
+		oscilloRight.clear();
+		render(bufferStrategy.getDrawGraphics());
+		getDataBufferUtil().copyToDataBuffer(pixelArrayBackground.getTable());
 	}
 }

@@ -15,6 +15,7 @@ public class PixelArray extends AbstractPixelArray {
 	int[] tmpUp = new int[1];
 
 	int[] up = new int[1];
+
 	public PixelArray(int width, int height, int backgroundColor) {
 		setBackgroundColor(backgroundColor);
 		setWidth(width);
@@ -35,6 +36,7 @@ public class PixelArray extends AbstractPixelArray {
 		System.arraycopy(down, 0, getTable(), 0, down.length);
 		System.arraycopy(tmpDown, 0, getTable(), down.length, tmpDown.length);
 	}
+
 	public void scrollLeft(int number) {
 		if (left == null || left.length != number) {
 			left = new int[number];

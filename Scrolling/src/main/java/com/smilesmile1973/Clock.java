@@ -1,10 +1,6 @@
 package com.smilesmile1973;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.Vector;
-
-import javax.swing.Timer;
 
 public class Clock implements Runnable {
 	private Vector<ClockListener> clockListeners = new Vector<ClockListener>();
