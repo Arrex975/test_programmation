@@ -5,7 +5,7 @@ import java.awt.image.BufferedImage;
 import com.smilesmile1973.graphics.BufferedImageUtils;
 import com.smilesmile1973.graphics.PixelArray;
 
-public class DigiFont extends BitmapFont {
+public class DigitalFont extends BitmapFont {
 
 	@Override
 	protected void buildMap() {

@@ -5,7 +5,7 @@ import java.awt.image.BufferedImage;
 import com.smilesmile1973.graphics.BufferedImageUtils;
 import com.smilesmile1973.graphics.PixelArray;
 
-public class MetalFonts extends BitmapFont {
+public class MetalFont extends BitmapFont {
 
 	@Override
 	protected void buildMap() {
