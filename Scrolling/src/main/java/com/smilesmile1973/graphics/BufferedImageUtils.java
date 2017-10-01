@@ -8,7 +8,21 @@ import java.io.InputStream;
 
 import javax.imageio.ImageIO;
 
+/**
+ * This class performs some operations to loade the images.
+ *
+ * @author Gérald Maréchal
+ *
+ */
 public class BufferedImageUtils {
+
+	/**
+	 * This method convert a {@link BufferedImage} to an ARGB {@link BufferedImage}
+	 *
+	 * @param src
+	 *            the {@link BufferedImage} to convert.
+	 * @return the converted {@link BufferedImage}
+	 */
 	public static BufferedImage convertToARGB(BufferedImage src) {
 		final BufferedImage dest = new BufferedImage(src.getWidth(), src.getHeight(), BufferedImage.TYPE_INT_ARGB);
 		final ColorConvertOp cco = new ColorConvertOp(src.getColorModel().getColorSpace(),
@@ -28,6 +42,17 @@ public class BufferedImageUtils {
 		return dest;
 	}
 
+	/**
+	 * This method converted the {@link BufferedImage} to a {@link PixelArray}
+	 *
+	 * @param image
+	 *            the given {@link BufferedImage}
+	 * @param clone
+	 *            to clone if <code>true</code> the BufferedImage is cloned inside
+	 *            the {@link PixelArray} and every modifications on it, will not be
+	 *            reflected inside the given {@link BufferedImage}.
+	 * @return one {@link PixelArray}
+	 */
 	public static PixelArray convertToPixelArray(BufferedImage image, boolean clone) {
 		PixelArray result = null;
 		result = new PixelArray(image.getWidth(), image.getHeight(), 0);
@@ -40,10 +65,17 @@ public class BufferedImageUtils {
 		return result;
 	}
 
-	public static BufferedImage loadBufferedImage(String image) {
+	/**
+	 * Load and return a {@link BufferedImage} by the given path (uri).
+	 * 
+	 * @param path
+	 *            the path for the image.
+	 * @return one {@link BufferedImage}
+	 */
+	public static BufferedImage loadBufferedImage(String path) {
 		BufferedImage result = null;
 		try {
-			final InputStream in = BufferedImageUtils.class.getResourceAsStream(image);
+			final InputStream in = BufferedImageUtils.class.getResourceAsStream(path);
 			final BufferedImage bufferedImage = ImageIO.read(in);
 			result = convertToARGB(bufferedImage);
 		} catch (final IOException e) {

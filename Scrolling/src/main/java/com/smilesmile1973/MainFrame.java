@@ -14,14 +14,15 @@ import java.util.Scanner;
 
 import javax.swing.JFrame;
 
-import com.smilesmile1973.graphics.BitmapFont;
 import com.smilesmile1973.graphics.BufferedImageUtils;
 import com.smilesmile1973.graphics.DataBufferUtil;
 import com.smilesmile1973.graphics.FFTarray;
-import com.smilesmile1973.graphics.OscilloscopeArray;
 import com.smilesmile1973.graphics.PixelArray;
 import com.smilesmile1973.graphics.SoundPcmUtils;
-import com.smilesmile1973.graphics.XenonFonts;
+import com.smilesmile1973.graphics.fonts.BitmapFont;
+import com.smilesmile1973.graphics.fonts.NikNakFont;
+import com.smilesmile1973.graphics.oscillos.OscilloScopePoint;
+import com.smilesmile1973.graphics.oscillos.OscilloscopeArray;
 import com.smilesmile1973.micromod.Module;
 import com.smilesmile1973.micromod.Player;
 import com.smilesmile1973.micromod.PlayerListener;
@@ -38,7 +39,6 @@ public class MainFrame extends JFrame implements Runnable, KeyListener {
 
 	double[] amplitudes;
 	private BufferedImage bufferedImage;
-	private BufferStrategy bufferStrategy;
 	long cycleTime;
 	private DataBufferUtil dataBufferUtil;
 	private final GraphicsDevice device;
@@ -64,6 +64,7 @@ public class MainFrame extends JFrame implements Runnable, KeyListener {
 		super();
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		device = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+
 		if (device.isFullScreenSupported()) {
 			setResizable(false);
 			setIgnoreRepaint(true);
@@ -73,6 +74,7 @@ public class MainFrame extends JFrame implements Runnable, KeyListener {
 			this.setBackground(Color.BLACK);
 			device.setFullScreenWindow(this);
 		} else {
+
 			setResizable(false);
 			setIgnoreRepaint(true);
 			setUndecorated(true);
@@ -81,21 +83,21 @@ public class MainFrame extends JFrame implements Runnable, KeyListener {
 			this.setSize(800, 600);
 			this.setVisible(true);
 		}
+
 		if (device.isDisplayChangeSupported()) {
 			final DisplayMode displayMode = new DisplayMode(800, 600, 32, 60);
 			device.setDisplayMode(displayMode);
 		}
+
 		this.createBufferStrategy(2);
-		bufferStrategy = this.getBufferStrategy();
-		this.setBufferStrategy(bufferStrategy);
 		validate();
 		final BufferedImage bufferedImage = BufferedImageUtils.loadBufferedImage("/london.jpg");
-		final String content = new Scanner(MainFrame.class.getResourceAsStream("/cv.txt"), "UTF-8").useDelimiter("\\A")
-				.next();
+		final String content = new Scanner(MainFrame.class.getResourceAsStream("/cvNikNak.txt"), "UTF-8")
+				.useDelimiter("\\A").next();
 		pixelArrayBackground = BufferedImageUtils.convertToPixelArray(bufferedImage, true);
 		setDataBufferUtil(new DataBufferUtil(bufferedImage.getRaster().getDataBuffer(), bufferedImage.getWidth(),
 				bufferedImage.getHeight(), 0xFF00FF00));
-		fonts = new XenonFonts();
+		fonts = new NikNakFont();
 		fonts.setTextToDisplay(content);
 		heightText = fonts.getHeightOfText();
 		fftArrayLeft = new FFTarray();
@@ -105,45 +107,22 @@ public class MainFrame extends JFrame implements Runnable, KeyListener {
 		fftArrayRight.setPosX(490);
 		fftArrayRight.setPosY(400);
 
-		oscilloLeft = new OscilloscopeArray(300, 400, 0);
+		oscilloLeft = new OscilloScopePoint(300, 400, 0);
 		oscilloLeft.setPosX(10);
 		oscilloLeft.setPosY(100);
 
-		oscilloRight = new OscilloscopeArray(300, 400, 0);
+		oscilloRight = new OscilloScopePoint(300, 400, 0);
 		oscilloRight.setPosX(490);
 		oscilloRight.setPosY(100);
 
 		setBufferedImage(bufferedImage);
-		final Clock keyboardClock = new Clock(1000 / 100);
+		// Main Loop
 		Thread loop = new Thread(this);
-		keyboardClock.addClockListener(new ClockListener() {
-			@Override
-			public void runMe() {
-				switch (direction) {
-				case 4:
-					pixelArrayBackground.scrollLeft(getScrollSpeed());
-					break;
-				case 6:
-					pixelArrayBackground.scrollRight(getScrollSpeed());
-					break;
-				case 8:
-					pixelArrayBackground.scrollUp(getScrollSpeed());
-					break;
-				case 2:
-					pixelArrayBackground.scrollDown(getScrollSpeed());
-					fonts.moveUp(2);
-					if (fonts.getPosY() <= -heightText) {
-						fonts.setPosY(pixelArrayBackground.getWidth());
-					}
-					break;
-				}
-			}
-
-		});
+		loop.start();
 		this.addKeyListener(this);
 		// Music
 		buildThreadMusic().start();
-		loop.start();
+
 	}
 
 	private Thread buildThreadMusic() throws IOException {
@@ -231,7 +210,7 @@ public class MainFrame extends JFrame implements Runnable, KeyListener {
 	private synchronized void render(Graphics g) {
 		// The display is here
 		g.drawImage(getBufferedImage(), 0, 0, null);
-		bufferStrategy.show();
+		getBufferStrategy().show();
 		g.dispose();
 	}
 
@@ -248,10 +227,6 @@ public class MainFrame extends JFrame implements Runnable, KeyListener {
 
 	public void setBufferedImage(BufferedImage bufferedImage) {
 		this.bufferedImage = bufferedImage;
-	}
-
-	private void setBufferStrategy(BufferStrategy bufferStrategy) {
-		this.bufferStrategy = bufferStrategy;
 	}
 
 	public void setDataBufferUtil(DataBufferUtil dataBufferUtil) {
@@ -278,10 +253,28 @@ public class MainFrame extends JFrame implements Runnable, KeyListener {
 
 	// @Override
 	public void updateGui(BufferStrategy bufferStrategy) {
+		switch (direction) {
+		case 4:
+			pixelArrayBackground.scrollLeft(getScrollSpeed());
+			break;
+		case 6:
+			pixelArrayBackground.scrollRight(getScrollSpeed());
+			break;
+		case 8:
+			pixelArrayBackground.scrollUp(getScrollSpeed());
+			break;
+		case 2:
+			pixelArrayBackground.scrollDown(getScrollSpeed());
+			fonts.moveUp(2);
+			if (fonts.getPosY() <= -heightText) {
+				fonts.setPosY(pixelArrayBackground.getWidth());
+			}
+			break;
+		}
 		if (soundData != null) {
 			final int[][] rawPCM = SoundPcmUtils.transform(soundData, lengthSound);
-			leftSound = SoundPcmUtils.interpolate(300, rawPCM[0]);
-			rightSound = SoundPcmUtils.interpolate(300, rawPCM[1]);
+			leftSound = SoundPcmUtils.interpolate(oscilloLeft.getNumberOfPoints(), rawPCM[0]);
+			rightSound = SoundPcmUtils.interpolate(oscilloLeft.getNumberOfPoints(), rawPCM[1]);
 			oscilloLeft.drawOscillo(leftSound);
 			oscilloRight.drawOscillo(rightSound);
 			fftArrayLeft.processSoundData(rawPCM[0], lengthSound);

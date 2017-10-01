@@ -84,9 +84,9 @@ public class SoundPcmUtils {
 		final int set = data.length / numberOfBand;
 		double tmp = 0;
 		int c = 0;
-		for (int i = 0; i < set * numberOfBand; i++) {
+		for (int i = 0; i < data.length; i++) {
 			tmp = tmp + data[i];
-			if ((i > 0) && (i % set == 0)) {
+			if ((i > 0) && (i % set == 0) && c < resultsInterpolate.length) {
 				resultsInterpolate[c] = (int) Math.round(tmp / set);
 				c++;
 				tmp = 0;

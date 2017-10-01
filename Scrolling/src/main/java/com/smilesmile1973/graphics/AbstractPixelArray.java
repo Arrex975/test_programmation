@@ -139,7 +139,7 @@ public abstract class AbstractPixelArray implements IPixelArray {
 	 *            position on the x axis.
 	 * @param y
 	 *            position on the y axis.
-	 * @author marechal
+	 * @author Gérald Maréchal
 	 */
 	@Override
 	public synchronized void setPixel(int x, int y, int color) {

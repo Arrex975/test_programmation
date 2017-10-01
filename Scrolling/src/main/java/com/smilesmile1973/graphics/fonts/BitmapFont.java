@@ -1,19 +1,36 @@
-package com.smilesmile1973.graphics;
+package com.smilesmile1973.graphics.fonts;
 
 import java.util.TreeMap;
 
-public class BitmapFont {
+import com.smilesmile1973.graphics.IPixelArray;
 
-	protected final int width = 16;
-	protected final int height = 23;
+public abstract class BitmapFont {
+
+	private int width = 16;
+	private int height = 16;
+
 	private final TreeMap<String, int[]> fontsMap = new TreeMap<String, int[]>();
+
 	private int posX;
+
 	private int posY;
+
 	private int interLine = 3;
+
 	private String textToDisplay;
+
+	public BitmapFont() {
+		buildMap();
+	}
+
+	abstract protected void buildMap();
 
 	protected TreeMap<String, int[]> getFontsMap() {
 		return fontsMap;
+	}
+
+	public int getHeight() {
+		return height;
 	}
 
 	public int getHeightOfText() {
@@ -21,10 +38,14 @@ public class BitmapFont {
 		for (int i = 0; i < getTextToDisplay().length(); i++) {
 			final char tmpChar = getTextToDisplay().charAt(i);
 			if (tmpChar == '\n') {
-				result = result + height + interLine;
+				result = result + getHeight() + getInterLine();
 			}
 		}
 		return result;
+	}
+
+	public int getInterLine() {
+		return interLine;
 	}
 
 	public int getPosX() {
@@ -39,12 +60,24 @@ public class BitmapFont {
 		return textToDisplay;
 	}
 
+	public int getWidth() {
+		return width;
+	}
+
 	public void moveDown(int speed) {
 		setPosXPosy(posX, posY + speed);
 	}
 
 	public void moveUp(int speed) {
 		setPosXPosy(posX, posY - speed);
+	}
+
+	public void setHeight(int height) {
+		this.height = height;
+	}
+
+	public void setInterLine(int interLine) {
+		this.interLine = interLine;
 	}
 
 	public void setPosX(int posX) {
@@ -64,6 +97,10 @@ public class BitmapFont {
 		this.textToDisplay = textToDisplay;
 	}
 
+	public void setWidth(int width) {
+		this.width = width;
+	}
+
 	public void write(IPixelArray out) {
 		int x = posX;
 		int y = posY;
@@ -72,16 +109,16 @@ public class BitmapFont {
 		for (int i = 0; i < getTextToDisplay().length(); i++) {
 			final char tmpChar = getTextToDisplay().charAt(i);
 			if (tmpChar == '\n') {
-				y = y + height + interLine;
+				y = y + getHeight() + getInterLine();
 				x = tmpX;
 			} else {
 				tmp = getFontsMap().get(String.valueOf(tmpChar));
 				if (tmp != null) {
-					out.fillRectangleOfPixel(x, y, width, height, tmp);
+					out.fillRectangleOfPixel(x, y, getWidth(), getHeight(), tmp);
 				} else {
-					out.fillRectangleOfPixel(x, y, width, height, getFontsMap().get(String.valueOf(" ")));
+					out.fillRectangleOfPixel(x, y, getWidth(), getHeight(), getFontsMap().get(String.valueOf(" ")));
 				}
-				x = x + width;
+				x = x + getWidth();
 			}
 		}
 	}
