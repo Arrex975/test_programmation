@@ -144,8 +144,8 @@ public abstract class AbstractPixelArray implements IPixelArray {
 	@Override
 	public synchronized void setPixel(int x, int y, int color) {
 		if ((color & 0xff000000) != 0) {
-			if (x < getWidth() && y < getHeight()) {
-				if (x >= 0 && y >= 0) {
+			if (x < getWidth() && x > -1) {
+				if (y > -1 && y < getHeight()) {
 					table[x + y * getWidth()] = color;
 				}
 			}

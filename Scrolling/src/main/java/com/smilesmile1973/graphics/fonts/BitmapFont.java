@@ -2,8 +2,6 @@ package com.smilesmile1973.graphics.fonts;
 
 import java.util.TreeMap;
 
-import com.smilesmile1973.graphics.IPixelArray;
-
 public abstract class BitmapFont {
 
 	private int width = 16;
@@ -25,7 +23,7 @@ public abstract class BitmapFont {
 
 	abstract protected void buildMap();
 
-	protected TreeMap<String, int[]> getFontsMap() {
+	public TreeMap<String, int[]> getFontsMap() {
 		return fontsMap;
 	}
 
@@ -35,12 +33,16 @@ public abstract class BitmapFont {
 
 	public int getHeightOfText() {
 		int result = 0;
-		for (int i = 0; i < getTextToDisplay().length(); i++) {
-			final char tmpChar = getTextToDisplay().charAt(i);
-			if (tmpChar == '\n') {
-				result = result + getHeight() + getInterLine();
+		if (getTextToDisplay() != null && getTextToDisplay().length() > 0) {
+			result = getHeight();
+			for (int i = 0; i < getTextToDisplay().length(); i++) {
+				final char tmpChar = getTextToDisplay().charAt(i);
+				if (tmpChar == '\n') {
+					result = result + getHeight() + getInterLine();
+				}
 			}
 		}
+
 		return result;
 	}
 
@@ -100,27 +102,4 @@ public abstract class BitmapFont {
 	public void setWidth(int width) {
 		this.width = width;
 	}
-
-	public void write(IPixelArray out) {
-		int x = posX;
-		int y = posY;
-		final int tmpX = x;
-		int[] tmp = null;
-		for (int i = 0; i < getTextToDisplay().length(); i++) {
-			final char tmpChar = getTextToDisplay().charAt(i);
-			if (tmpChar == '\n') {
-				y = y + getHeight() + getInterLine();
-				x = tmpX;
-			} else {
-				tmp = getFontsMap().get(String.valueOf(tmpChar));
-				if (tmp != null) {
-					out.fillRectangleOfPixel(x, y, getWidth(), getHeight(), tmp);
-				} else {
-					out.fillRectangleOfPixel(x, y, getWidth(), getHeight(), getFontsMap().get(String.valueOf(" ")));
-				}
-				x = x + getWidth();
-			}
-		}
-	}
-
 }

@@ -21,6 +21,7 @@ import com.smilesmile1973.graphics.PixelArray;
 import com.smilesmile1973.graphics.SoundPcmUtils;
 import com.smilesmile1973.graphics.fonts.BitmapFont;
 import com.smilesmile1973.graphics.fonts.NikNakFont;
+import com.smilesmile1973.graphics.fonts.writer.FontWriterUtil;
 import com.smilesmile1973.graphics.oscillos.OscilloScopePoint;
 import com.smilesmile1973.graphics.oscillos.OscilloscopeArray;
 import com.smilesmile1973.micromod.Module;
@@ -265,7 +266,7 @@ public class MainFrame extends JFrame implements Runnable, KeyListener {
 			break;
 		case 2:
 			pixelArrayBackground.scrollDown(getScrollSpeed());
-			fonts.moveUp(2);
+			fonts.moveUp(5);
 			if (fonts.getPosY() <= -heightText) {
 				fonts.setPosY(pixelArrayBackground.getWidth());
 			}
@@ -284,7 +285,8 @@ public class MainFrame extends JFrame implements Runnable, KeyListener {
 		fftArrayRight.write(getDataBufferUtil());
 		oscilloLeft.write(getDataBufferUtil());
 		oscilloRight.write(getDataBufferUtil());
-		fonts.write(getDataBufferUtil());
+		FontWriterUtil.writeVertically(getDataBufferUtil(), fonts.getTextToDisplay(), fonts, fonts.getPosX(),
+				fonts.getPosY());
 		fftArrayLeft.clear();
 		fftArrayRight.clear();
 		oscilloLeft.clear();
